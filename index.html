@@ -23,7 +23,7 @@
 
         .container {
             width: 100%;
-            max-width: 600px;
+            max-width: 650px;
             margin: auto;
             background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
             border-radius: 30px;
@@ -36,25 +36,14 @@
         .header { text-align: center; margin-bottom: 25px; }
         .title { font-size: 26px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; }
         
-        .creator-text {
-            margin-top: 8px;
-            font-size: 13px;
-            color: #94a3b8;
-            font-weight: 600;
-        }
+        .creator-text { margin-top: 8px; font-size: 13px; color: #94a3b8; font-weight: 600; }
 
         /* Form Layout */
         .form-group { margin-bottom: 16px; }
         .form-row { display: flex; gap: 15px; margin-bottom: 16px; }
         .form-col { flex: 1; }
         
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 13px;
-            font-weight: 700;
-            color: #cbd5e1;
-        }
+        label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #cbd5e1; }
 
         .input-box {
             width: 100%;
@@ -71,114 +60,84 @@
         .input-box:focus { border-color: #38bdf8; background: rgba(255,255,255,0.1); }
         .input-box option { background: #0f172a; color: white; }
 
-        /* Period Buttons */
-        .period-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-
+        /* Period Buttons (Hidden by default, used for quick select) */
+        .period-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
         .period-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #cbd5e1;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            transition: 0.3s;
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #cbd5e1; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.3s;
         }
-
-        .period-btn:hover, .period-btn.active {
-            background: #e11d48;
-            border-color: #be123c;
-            color: white;
-        }
+        .period-btn:hover, .period-btn.active { background: #e11d48; border-color: #be123c; color: white; }
 
         /* Action Buttons */
-        .btn-row {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-        }
-
-        .btn {
-            border: none;
-            border-radius: 12px;
-            padding: 14px 30px;
-            font-size: 15px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-cancel { background: transparent; color: white; }
-        .btn-save {
-            background: #e11d48;
-            color: white;
-            box-shadow: 0 5px 15px rgba(225, 29, 72, 0.3);
-        }
+        .btn-row { display: flex; justify-content: space-between; margin-top: 30px; }
+        .btn { border: none; border-radius: 12px; padding: 14px 30px; font-size: 15px; font-weight: 800; cursor: pointer; transition: 0.3s; }
+        .btn-cancel { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.2); }
+        .btn-save { background: #e11d48; color: white; box-shadow: 0 5px 15px rgba(225, 29, 72, 0.3); }
         .btn-save:hover { background: #be123c; }
 
         /* Loader & Toast */
         #loader { display: none; text-align: center; margin-top: 20px; color: #38bdf8; font-weight: bold; }
         
         #toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #111827, #1f2937);
-            padding: 14px 20px;
-            border-radius: 16px;
-            color: white;
-            font-weight: 700;
-            z-index: 9999;
-            display: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, #111827, #1f2937); padding: 14px 20px;
+            border-radius: 16px; color: white; font-weight: 700; z-index: 9999;
+            display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
 
         /* Results Screen */
-        #resultsScreen { display: none; text-align: center; animation: fadeIn 0.4s; }
+        #resultsScreen { display: none; animation: fadeIn 0.4s; }
         
-        .result-card {
-            background: rgba(255,255,255,0.06);
-            padding: 25px;
-            border-radius: 16px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
+        .code-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+            border-radius: 16px; padding: 16px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.10);
+            transition: 0.3s ease;
         }
 
-        .result-count { font-size: 40px; font-weight: 900; color: #38bdf8; margin: 10px 0; }
-        
-        .download-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #16a34a, #22c55e);
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 12px;
+        .card-header-toggle {
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; user-select: none;
         }
+        
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .code-icon {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: linear-gradient(135deg, #e11d48, #be123c);
+            display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900;
+        }
+        .code-title { font-size: 18px; font-weight: 800; }
+        .code-subtitle { font-size: 12px; color: #94a3b8; }
+        
+        .toggle-arrow { transition: transform 0.3s ease; }
+        .rotate-arrow { transform: rotate(180deg); }
+
+        .card-collapsible {
+            display: none; margin-top: 16px; padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .summary-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px; margin-bottom: 16px;
+        }
+
+        .summary-box {
+            background: rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 8px; text-align: center;
+        }
+        .summary-number { font-size: 20px; font-weight: 900; color: #38bdf8; }
+        .summary-label { font-size: 11px; color: #cbd5e1; margin-top: 4px; font-weight: bold; }
+
+        .action-btn-row { display: flex; gap: 10px; }
+        .download-btn, .share-btn {
+            flex: 1; border: none; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: bold;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; color: white;
+        }
+        .download-btn { background: linear-gradient(135deg, #16a34a, #22c55e); }
+        .share-btn { background: linear-gradient(135deg, #2563eb, #38bdf8); }
 
         .back-btn {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 12px;
-            border-radius: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
+            background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);
+            padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px;
         }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
@@ -209,14 +168,6 @@
             </div>
         </div>
 
-        <label>Period</label>
-        <div class="period-grid">
-            <button class="period-btn" onclick="setPeriod('today', this)">Today</button>
-            <button class="period-btn" onclick="setPeriod('thisMonth', this)">This Month</button>
-            <button class="period-btn" onclick="setPeriod('thisYear', this)">This Year</button>
-            <button class="period-btn" onclick="setPeriod('currentFY', this)">Current F.Y</button>
-        </div>
-
         <div class="form-group">
             <label>Code</label>
             <select id="selCode" class="input-box"><option value="">-- All --</option></select>
@@ -233,34 +184,30 @@
         </div>
 
         <div class="form-group">
-            <label>User Name</label>
+            <label>User Name (Tested By)</label>
             <select id="selUser" class="input-box"><option value="">-- All --</option></select>
         </div>
 
         <div id="loader">Fetching and filtering data...</div>
 
         <div class="btn-row">
-            <button class="btn btn-cancel" onclick="resetForm()">Cancel</button>
-            <button class="btn btn-save" onclick="generateReport()">Generate</button>
+            <button class="btn btn-cancel" onclick="resetForm()">Reset</button>
+            <button class="btn btn-save" onclick="generateReport()">Generate Report</button>
         </div>
     </div>
 
     <div id="resultsScreen">
-        <div class="result-card">
-            <h3>Report Generated</h3>
-            <div class="result-count" id="recordCount">0</div>
-            <div style="color:#cbd5e1; font-size: 14px; margin-bottom: 20px;">Records Found</div>
-            
-            <button class="download-btn" onclick="downloadPDF()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                Download PDF
-            </button>
-            <button class="download-btn" style="background: linear-gradient(135deg, #2563eb, #38bdf8);" onclick="sharePDF()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                Share PDF
-            </button>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h2 style="color: #38bdf8;">Reports Generated</h2>
+            <p style="color: #cbd5e1; font-size: 14px;" id="totalRecordsText">0 Total Records Found</p>
         </div>
-        <button class="back-btn" onclick="goBack()">Back to Search</button>
+
+        <div id="codeCardsContainer"></div>
+
+        <button class="back-btn" onclick="goBack()">
+            <svg width="18" height="18" style="vertical-align: middle; margin-right: 5px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
+            Back to Search
+        </button>
     </div>
 
 </div>
@@ -268,7 +215,7 @@
 <script>
     const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1WYK6dThqgY6vU-HpKggFXN0Roz3aq3wX99BTGDEkgcQ/export?format=csv&gid=0';
     
-    // Exact Column Mapping based on Data Sheet Headers
+    // Column Indexes
     const COL_DATE = 1;
     const COL_MAKE = 2;
     const COL_MFG = 3;
@@ -283,10 +230,9 @@
     const COL_USER = 18; // ModifiedByName
     
     let globalData = [];
-    let filteredData = [];
+    let groupedFilteredData = {}; 
 
     window.onload = async () => {
-        // Set date inputs to Today initially (Period buttons stay untouched)
         const todayStr = getLocalYMD(new Date());
         document.getElementById('startDate').value = todayStr;
         document.getElementById('endDate').value = todayStr;
@@ -349,44 +295,10 @@
         });
     }
 
-    function setPeriod(type, btnElement) {
-        document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
-        if(btnElement) btnElement.classList.add('active');
-
-        const today = new Date();
-        let start, end;
-
-        if (type === 'today') {
-            start = end = today;
-        } else if (type === 'thisMonth') {
-            start = new Date(today.getFullYear(), today.getMonth(), 1);
-            end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        } else if (type === 'thisYear') {
-            start = new Date(today.getFullYear(), 0, 1);
-            end = new Date(today.getFullYear(), 11, 31);
-        } else if (type === 'currentFY') {
-            const currentYear = today.getFullYear();
-            const currentMonth = today.getMonth(); 
-            if (currentMonth >= 3) {
-                start = new Date(currentYear, 3, 1);
-                end = new Date(currentYear + 1, 2, 31);
-            } else {
-                start = new Date(currentYear - 1, 3, 1);
-                end = new Date(currentYear, 2, 31);
-            }
-        }
-
-        document.getElementById('startDate').value = getLocalYMD(start);
-        document.getElementById('endDate').value = getLocalYMD(end);
-    }
-
     function parseDateCustom(dateStr) {
         if (!dateStr) return null;
-        // Assume DD/MM/YYYY or DD-MM-YYYY
         const parts = dateStr.split(/[\/\-]/);
-        if (parts.length === 3) {
-            return new Date(parts[2], parts[1] - 1, parts[0]);
-        }
+        if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
         return new Date(dateStr);
     }
 
@@ -395,6 +307,22 @@
         if (!d || isNaN(d)) return dateStr;
         const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         return String(d.getDate()).padStart(2,'0') + '-' + months[d.getMonth()] + '-' + d.getFullYear();
+    }
+
+    function toggleCard(codeId) {
+        const body = document.getElementById(`body-${codeId}`);
+        const arrow = document.getElementById(`arrow-${codeId}`);
+        
+        const isClosed = (body.style.display === 'none' || body.style.display === '');
+        
+        // Close all others first
+        document.querySelectorAll('.card-collapsible').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.toggle-arrow').forEach(el => el.classList.remove('rotate-arrow'));
+
+        if (isClosed) {
+            body.style.display = 'block';
+            arrow.classList.add('rotate-arrow');
+        }
     }
 
     function generateReport() {
@@ -409,17 +337,15 @@
         document.getElementById('loader').style.display = 'block';
 
         setTimeout(() => {
-            const startD = new Date(startDateVal);
-            startD.setHours(0,0,0,0);
-            const endD = new Date(endDateVal);
-            endD.setHours(23, 59, 59);
+            const startD = new Date(startDateVal); startD.setHours(0,0,0,0);
+            const endD = new Date(endDateVal); endD.setHours(23, 59, 59);
 
             const sMake = document.getElementById('selMake').value;
             const sGroup = document.getElementById('selGroup').value;
             const sUser = document.getElementById('selUser').value;
             const sCode = document.getElementById('selCode').value;
 
-            filteredData = globalData.filter(row => {
+            const filteredData = globalData.filter(row => {
                 const rowDate = parseDateCustom(row[COL_DATE]);
                 if (!rowDate) return false;
                 
@@ -428,23 +354,94 @@
                 if (sGroup && row[COL_GROUP] !== sGroup) match = false;
                 if (sUser && row[COL_USER] !== sUser) match = false;
                 if (sCode && row[COL_CODE] !== sCode) match = false;
-
                 return match;
             });
-
-            // Sort data by Date
-            filteredData.sort((a,b) => parseDateCustom(a[COL_DATE]) - parseDateCustom(b[COL_DATE]));
 
             document.getElementById('loader').style.display = 'none';
             
             if (filteredData.length === 0) {
                 showToast("No records found for selected criteria.");
-            } else {
-                document.getElementById('recordCount').innerText = filteredData.length;
-                document.getElementById('formScreen').style.display = 'none';
-                document.getElementById('resultsScreen').style.display = 'block';
+                return;
             }
+
+            // Group By Code
+            groupedFilteredData = {};
+            filteredData.forEach(row => {
+                const code = row[COL_CODE] || 'No Code';
+                if (!groupedFilteredData[code]) groupedFilteredData[code] = [];
+                groupedFilteredData[code].push(row);
+            });
+
+            // Sort each group's data by Date
+            Object.keys(groupedFilteredData).forEach(code => {
+                groupedFilteredData[code].sort((a,b) => parseDateCustom(a[COL_DATE]) - parseDateCustom(b[COL_DATE]));
+            });
+
+            document.getElementById('totalRecordsText').innerText = `${filteredData.length} Total Records Found`;
+            renderCodeCards();
+
+            document.getElementById('formScreen').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'block';
         }, 300);
+    }
+
+    function renderCodeCards() {
+        const container = document.getElementById('codeCardsContainer');
+        container.innerHTML = '';
+
+        Object.keys(groupedFilteredData).forEach((code, index) => {
+            const dataRows = groupedFilteredData[code];
+            const safeId = `code_${index}`;
+
+            // Calculate Group Totals inside this Code
+            const groupCounts = {};
+            dataRows.forEach(r => {
+                const grp = r[COL_GROUP] || 'Blank';
+                groupCounts[grp] = (groupCounts[grp] || 0) + 1;
+            });
+
+            // Build Summary Grid HTML
+            let summaryHtml = '<div class="summary-grid">';
+            Object.keys(groupCounts).sort().forEach(g => {
+                summaryHtml += `
+                    <div class="summary-box">
+                        <div class="summary-number">${groupCounts[g]}</div>
+                        <div class="summary-label">Group ${g}</div>
+                    </div>`;
+            });
+            summaryHtml += '</div>';
+
+            const card = document.createElement('div');
+            card.className = 'code-card';
+            card.innerHTML = `
+                <div class="card-header-toggle" onclick="toggleCard('${safeId}')">
+                    <div class="header-left">
+                        <div class="code-icon">${code.substring(0,2)}</div>
+                        <div>
+                            <div class="code-title">Code: ${code}</div>
+                            <div class="code-subtitle">${dataRows.length} Entries</div>
+                        </div>
+                    </div>
+                    <div class="toggle-arrow" id="arrow-${safeId}">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                </div>
+                <div class="card-collapsible" id="body-${safeId}">
+                    ${summaryHtml}
+                    <div class="action-btn-row">
+                        <button class="download-btn" onclick="downloadPDF('${code}')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Download
+                        </button>
+                        <button class="share-btn" onclick="sharePDF('${code}')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                            Share
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
     }
 
     function resetForm() {
@@ -454,7 +451,6 @@
         document.getElementById('selGroup').value = '';
         document.getElementById('selUser').value = '';
         document.getElementById('selCode').value = '';
-        document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
     }
 
     function goBack() {
@@ -462,13 +458,14 @@
         document.getElementById('formScreen').style.display = 'block';
     }
 
-    async function buildPDFBlob() {
+    async function buildPDFBlob(targetCode) {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('landscape'); // Landscape required for many columns
+        const doc = new jsPDF('landscape'); 
         
-        // Prepare Data & RowSpan Logic
+        const dataToPrint = groupedFilteredData[targetCode];
+
         const dateCounts = {};
-        filteredData.forEach(r => {
+        dataToPrint.forEach(r => {
             const d = r[COL_DATE];
             dateCounts[d] = (dateCounts[d] || 0) + 1;
         });
@@ -477,11 +474,11 @@
         let currentGroup = -1;
         let previousDate = '';
 
-        filteredData.forEach(r => {
+        dataToPrint.forEach(r => {
             let rawDate = r[COL_DATE];
             let displayDate = formatDisplayDate(rawDate);
 
-            // Structure: Date, Make, Mfg. Date, SL. No., Free Height, Height Under Load, Group, Crack, Remark, Tested By, Cause of Failure, Make, Total
+            // Columns specified: Date, Make, Mfg. Date, SL. No., Free Height, Height Under Load, Group, Crack, Remark(Cause of Failure), Tested By, Cause of Failure, Make, Total.
             let innerRow = [
                 r[COL_MAKE] || '',
                 r[COL_MFG] || '',
@@ -490,11 +487,11 @@
                 r[COL_HT_LOAD] || '',
                 r[COL_GROUP] || '',
                 r[COL_CRACK] || '',
-                r[COL_REMARK] || '',
-                r[COL_USER] || '',
-                r[COL_CAUSE] || '',
+                r[COL_REMARK] || '', // Using Remark
+                r[COL_USER] || '',   // Tested By
+                r[COL_CAUSE] || '',  // Cause of Failure
                 r[COL_MAKE] || '',
-                '1' // Displaying 1 as quantity/total per row based on previous app design
+                '1'
             ];
 
             if (rawDate !== previousDate) {
@@ -519,11 +516,10 @@
             head: [tableHeaders],
             body: bodyRows.map(r => r.row),
             theme: 'grid',
-            styles: { fontSize: 7.5, cellPadding: 2, lineColor: [200, 200, 200], lineWidth: 0.1, valign: 'middle' },
+            styles: { fontSize: 7, cellPadding: 1.5, lineColor: [200, 200, 200], lineWidth: 0.1, valign: 'middle', overflow: 'linebreak' },
             headStyles: { textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center', lineWidth: 0 },
             columnStyles: {
-                0: { cellWidth: 22, halign: 'center' },
-                // Allow auto sizing for the rest to fit in landscape naturally
+                0: { cellWidth: 20, halign: 'center' },
                 12: { halign: 'center', fontStyle: 'bold' }
             },
             didParseCell: function(data) {
@@ -532,7 +528,6 @@
                     data.cell.styles.lineWidth = 0;
                 }
                 if (data.section === 'body') {
-                    // Alternate row colors based on DATE GROUP
                     const rowData = bodyRows[data.row.index];
                     const bgColor = rowData.group % 2 === 0 ? [255, 255, 255] : [235, 243, 255]; 
                     data.cell.styles.fillColor = bgColor;
@@ -540,14 +535,12 @@
             },
             willDrawCell: function(data) {
                 if (data.section === 'head') {
-                    // Exact Gradient Header Code from your previous Web App
-                    let tableW = 277; // Roughly A4 Landscape usable width
-                    let relativeX = data.cell.x - 10; // offset margin
+                    let tableW = doc.internal.pageSize.width - 20;
+                    let relativeX = data.cell.x - 10;
                     
                     for (let i = 0; i <= data.cell.width; i += 0.5) { 
                         let ratio = (relativeX + i) / tableW;
                         ratio = Math.max(0, Math.min(1, ratio));
-                        
                         let r = Math.round(30 + (37 - 30) * ratio);
                         let g = Math.round(58 + (99 - 58) * ratio);
                         let b = Math.round(138 + (235 - 138) * ratio);
@@ -560,7 +553,7 @@
             }
         });
 
-        // Global Header & Footer (Runs on every page)
+        // Headers and Footers for every page
         const pageCount = doc.internal.getNumberOfPages();
         const pageHeight = doc.internal.pageSize.height;
         const pageWidth = doc.internal.pageSize.width;
@@ -568,7 +561,6 @@
         for(let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
             
-            // Header Bar
             const headerHeight = 25;
             for (let x = 0; x <= pageWidth; x += 0.5) {
                 let ratio = x / pageWidth;
@@ -579,7 +571,6 @@
                 doc.rect(x, 0, 0.6, headerHeight, 'F'); 
             }
 
-            // Footer Bar
             const footerHeight = 12;
             const footerY = pageHeight - footerHeight;
             for (let x = 0; x <= pageWidth; x += 0.5) {
@@ -591,18 +582,16 @@
                 doc.rect(x, footerY, 0.6, footerHeight, 'F'); 
             }
 
-            // Text on Header
             doc.setTextColor(255, 255, 255);
             doc.setFontSize(16);
             doc.setFont('helvetica', 'bold');
-            doc.text('SEARCH DATA WORK REPORT', pageWidth / 2, 10, {align:'center'});
+            doc.text(`SEARCH DATA WORK REPORT (Code: ${targetCode})`, pageWidth / 2, 10, {align:'center'});
 
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
             const dRange = `FROM: ${formatDisplayDate(document.getElementById('startDate').value)}     TO: ${formatDisplayDate(document.getElementById('endDate').value)}`;
             doc.text(dRange, pageWidth / 2, 18, {align:'center'});
 
-            // Text on Footer
             doc.setFontSize(9);
             doc.setTextColor(230, 240, 250);
             doc.text('App Created By Gobind Sharma', 14, pageHeight - 4.5);
@@ -612,12 +601,12 @@
         return doc.output('blob');
     }
 
-    async function downloadPDF() {
+    async function downloadPDF(code) {
         try {
-            const blob = await buildPDFBlob();
+            const blob = await buildPDFBlob(code);
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `Report_${document.getElementById('startDate').value}_to_${document.getElementById('endDate').value}.pdf`;
+            a.download = `Report_${code}_${document.getElementById('startDate').value}_to_${document.getElementById('endDate').value}.pdf`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -628,10 +617,10 @@
         }
     }
 
-    async function sharePDF() {
+    async function sharePDF(code) {
         try {
-            const blob = await buildPDFBlob();
-            const filename = `Report_${document.getElementById('startDate').value}_to_${document.getElementById('endDate').value}.pdf`;
+            const blob = await buildPDFBlob(code);
+            const filename = `Report_${code}_${document.getElementById('startDate').value}_to_${document.getElementById('endDate').value}.pdf`;
             const file = new File([blob], filename, { type: 'application/pdf' });
             
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
