@@ -35,7 +35,6 @@
 
         .header { text-align: center; margin-bottom: 25px; }
         .title { font-size: 26px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .title img { width: 40px; border-radius: 8px; }
         
         .creator-text {
             margin-top: 8px;
@@ -93,7 +92,7 @@
         }
 
         .period-btn:hover, .period-btn.active {
-            background: #e11d48; /* Red highlight matching your reference */
+            background: #e11d48;
             border-color: #be123c;
             color: white;
         }
@@ -115,28 +114,17 @@
             transition: 0.3s;
         }
 
-        .btn-cancel {
-            background: transparent;
-            color: white;
-        }
-
+        .btn-cancel { background: transparent; color: white; }
         .btn-save {
-            background: #e11d48; /* Red save button */
+            background: #e11d48;
             color: white;
             box-shadow: 0 5px 15px rgba(225, 29, 72, 0.3);
         }
-
         .btn-save:hover { background: #be123c; }
 
         /* Loader & Toast */
-        #loader {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-            color: #38bdf8;
-            font-weight: bold;
-        }
-
+        #loader { display: none; text-align: center; margin-top: 20px; color: #38bdf8; font-weight: bold; }
+        
         #toast {
             position: fixed;
             top: 20px;
@@ -235,11 +223,6 @@
         </div>
 
         <div class="form-group">
-            <label>Mfg. Year</label>
-            <select id="selMfgYear" class="input-box"><option value="">-- All --</option></select>
-        </div>
-
-        <div class="form-group">
             <label>Group</label>
             <select id="selGroup" class="input-box"><option value="">-- All --</option></select>
         </div>
@@ -283,28 +266,43 @@
 </div>
 
 <script>
-    // Replace htmlview URL with CSV export URL
     const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1WYK6dThqgY6vU-HpKggFXN0Roz3aq3wX99BTGDEkgcQ/export?format=csv&gid=0';
     
-    // Column Mapping - Adjust these indices based on your actual Google Sheet column layout
-    const COL_DATE = 0;
-    const COL_MAKE = 1;
-    const COL_MFG = 2;
-    const COL_GROUP = 6; // Assuming Group is col G (index 6)
-    const COL_USER = 9; // Assuming Tested By is col J (index 9)
-    const COL_CODE = 12; // Update with actual Code column index if exists
+    // Exact Column Mapping based on Data Sheet Headers
+    const COL_DATE = 1;
+    const COL_MAKE = 2;
+    const COL_MFG = 3;
+    const COL_SL = 4;
+    const COL_FREE_HT = 5;
+    const COL_HT_LOAD = 7;
+    const COL_GROUP = 8;
+    const COL_CRACK = 9;
+    const COL_CAUSE = 10;
+    const COL_REMARK = 11;
+    const COL_CODE = 12;
+    const COL_USER = 18; // ModifiedByName
     
     let globalData = [];
     let filteredData = [];
-    let headers = [];
 
     window.onload = async () => {
+        // Set date inputs to Today initially (Period buttons stay untouched)
+        const todayStr = getLocalYMD(new Date());
+        document.getElementById('startDate').value = todayStr;
+        document.getElementById('endDate').value = todayStr;
+
         document.getElementById('loader').style.display = 'block';
         document.getElementById('loader').innerText = 'Initializing data...';
         await fetchAndPopulateDropdowns();
         document.getElementById('loader').style.display = 'none';
-        setPeriod('currentFY', document.querySelectorAll('.period-btn')[3]); // Default to Current F.Y
     };
+
+    function getLocalYMD(d) {
+        let month = '' + (d.getMonth() + 1), day = '' + d.getDate(), year = d.getFullYear();
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+        return [year, month, day].join('-');
+    }
 
     function showToast(msg) {
         const t = document.getElementById('toast');
@@ -319,25 +317,21 @@
             const csvText = await response.text();
             const lines = csvText.split('\n').filter(l => l.trim() !== '');
             
-            headers = lines[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(h => h.replace(/^"|"$/g, '').trim());
-            
-            const makes = new Set(), mfgs = new Set(), groups = new Set(), users = new Set(), codes = new Set();
+            const makes = new Set(), groups = new Set(), users = new Set(), codes = new Set();
             
             for (let i = 1; i < lines.length; i++) {
                 const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/^"|"$/g, '').trim() : '');
-                if (row.length < 5) continue;
+                if (row.length < 10) continue; 
                 
                 globalData.push(row);
                 
                 if (row[COL_MAKE]) makes.add(row[COL_MAKE]);
-                if (row[COL_MFG]) mfgs.add(row[COL_MFG]);
                 if (row[COL_GROUP]) groups.add(row[COL_GROUP]);
                 if (row[COL_USER]) users.add(row[COL_USER]);
                 if (row[COL_CODE]) codes.add(row[COL_CODE]);
             }
 
             populateSelect('selMake', [...makes].sort());
-            populateSelect('selMfgYear', [...mfgs].sort());
             populateSelect('selGroup', [...groups].sort());
             populateSelect('selUser', [...users].sort());
             populateSelect('selCode', [...codes].sort());
@@ -371,9 +365,8 @@
             start = new Date(today.getFullYear(), 0, 1);
             end = new Date(today.getFullYear(), 11, 31);
         } else if (type === 'currentFY') {
-            // Indian FY: April 1 to March 31
             const currentYear = today.getFullYear();
-            const currentMonth = today.getMonth(); // 0 = Jan, 3 = Apr
+            const currentMonth = today.getMonth(); 
             if (currentMonth >= 3) {
                 start = new Date(currentYear, 3, 1);
                 end = new Date(currentYear + 1, 2, 31);
@@ -383,24 +376,25 @@
             }
         }
 
-        const format = d => {
-            let month = '' + (d.getMonth() + 1), day = '' + d.getDate(), year = d.getFullYear();
-            if (month.length < 2) month = '0' + month;
-            if (day.length < 2) day = '0' + day;
-            return [year, month, day].join('-');
-        };
-
-        document.getElementById('startDate').value = format(start);
-        document.getElementById('endDate').value = format(end);
+        document.getElementById('startDate').value = getLocalYMD(start);
+        document.getElementById('endDate').value = getLocalYMD(end);
     }
 
     function parseDateCustom(dateStr) {
         if (!dateStr) return null;
-        const parts = dateStr.split('/');
+        // Assume DD/MM/YYYY or DD-MM-YYYY
+        const parts = dateStr.split(/[\/\-]/);
         if (parts.length === 3) {
-            return new Date(parts[2], parts[1] - 1, parts[0]); // DD/MM/YYYY
+            return new Date(parts[2], parts[1] - 1, parts[0]);
         }
         return new Date(dateStr);
+    }
+
+    function formatDisplayDate(dateStr) {
+        const d = parseDateCustom(dateStr);
+        if (!d || isNaN(d)) return dateStr;
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return String(d.getDate()).padStart(2,'0') + '-' + months[d.getMonth()] + '-' + d.getFullYear();
     }
 
     function generateReport() {
@@ -416,11 +410,11 @@
 
         setTimeout(() => {
             const startD = new Date(startDateVal);
+            startD.setHours(0,0,0,0);
             const endD = new Date(endDateVal);
             endD.setHours(23, 59, 59);
 
             const sMake = document.getElementById('selMake').value;
-            const sMfg = document.getElementById('selMfgYear').value;
             const sGroup = document.getElementById('selGroup').value;
             const sUser = document.getElementById('selUser').value;
             const sCode = document.getElementById('selCode').value;
@@ -431,13 +425,15 @@
                 
                 let match = (rowDate >= startD && rowDate <= endD);
                 if (sMake && row[COL_MAKE] !== sMake) match = false;
-                if (sMfg && row[COL_MFG] !== sMfg) match = false;
                 if (sGroup && row[COL_GROUP] !== sGroup) match = false;
                 if (sUser && row[COL_USER] !== sUser) match = false;
                 if (sCode && row[COL_CODE] !== sCode) match = false;
 
                 return match;
             });
+
+            // Sort data by Date
+            filteredData.sort((a,b) => parseDateCustom(a[COL_DATE]) - parseDateCustom(b[COL_DATE]));
 
             document.getElementById('loader').style.display = 'none';
             
@@ -452,10 +448,9 @@
     }
 
     function resetForm() {
-        document.getElementById('startDate').value = '';
-        document.getElementById('endDate').value = '';
+        document.getElementById('startDate').value = getLocalYMD(new Date());
+        document.getElementById('endDate').value = getLocalYMD(new Date());
         document.getElementById('selMake').value = '';
-        document.getElementById('selMfgYear').value = '';
         document.getElementById('selGroup').value = '';
         document.getElementById('selUser').value = '';
         document.getElementById('selCode').value = '';
@@ -469,48 +464,149 @@
 
     async function buildPDFBlob() {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('landscape'); // Landscape for tabular data
+        const doc = new jsPDF('landscape'); // Landscape required for many columns
         
-        // Header styling
-        doc.setFillColor(30, 58, 138); // Dark blue header background
-        doc.rect(0, 0, 297, 25, 'F');
-        
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(18);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Filtered Data Report', 148.5, 12, { align: 'center' });
-
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        const dRange = `${document.getElementById('startDate').value} to ${document.getElementById('endDate').value}`;
-        doc.text(`Date Range: ${dRange}`, 148.5, 18, { align: 'center' });
-        
-        // Data Table Mapping
-        const tableBody = filteredData.map(row => {
-            // Mapping top 10 columns for standard landscape fit, customize as needed
-            return row.slice(0, 10); 
+        // Prepare Data & RowSpan Logic
+        const dateCounts = {};
+        filteredData.forEach(r => {
+            const d = r[COL_DATE];
+            dateCounts[d] = (dateCounts[d] || 0) + 1;
         });
-        
-        const tableHeaders = headers.slice(0, 10);
+
+        const bodyRows = [];
+        let currentGroup = -1;
+        let previousDate = '';
+
+        filteredData.forEach(r => {
+            let rawDate = r[COL_DATE];
+            let displayDate = formatDisplayDate(rawDate);
+
+            // Structure: Date, Make, Mfg. Date, SL. No., Free Height, Height Under Load, Group, Crack, Remark, Tested By, Cause of Failure, Make, Total
+            let innerRow = [
+                r[COL_MAKE] || '',
+                r[COL_MFG] || '',
+                r[COL_SL] || '',
+                r[COL_FREE_HT] || '',
+                r[COL_HT_LOAD] || '',
+                r[COL_GROUP] || '',
+                r[COL_CRACK] || '',
+                r[COL_REMARK] || '',
+                r[COL_USER] || '',
+                r[COL_CAUSE] || '',
+                r[COL_MAKE] || '',
+                '1' // Displaying 1 as quantity/total per row based on previous app design
+            ];
+
+            if (rawDate !== previousDate) {
+                currentGroup++;
+                bodyRows.push({
+                    row: [
+                        { content: displayDate, rowSpan: dateCounts[rawDate], styles: { valign: 'middle', halign: 'center', fontStyle: 'bold' } },
+                        ...innerRow
+                    ],
+                    group: currentGroup
+                });
+                previousDate = rawDate;
+            } else {
+                bodyRows.push({ row: innerRow, group: currentGroup });
+            }
+        });
+
+        const tableHeaders = ['Date', 'Make', 'Mfg.\nDate', 'SL. No.', 'Free\nHeight', 'Height Under\nLoad', 'Group', 'Crack', 'Remark', 'Tested By', 'Cause of\nFailure', 'Make', 'Total'];
 
         doc.autoTable({
-            startY: 30,
+            startY: 35,
             head: [tableHeaders],
-            body: tableBody,
+            body: bodyRows.map(r => r.row),
             theme: 'grid',
-            styles: { fontSize: 8, cellPadding: 2, valign: 'middle' },
-            headStyles: { fillColor: [225, 29, 72], textColor: 255, fontStyle: 'bold' },
-            alternateRowStyles: { fillColor: [240, 245, 255] }
+            styles: { fontSize: 7.5, cellPadding: 2, lineColor: [200, 200, 200], lineWidth: 0.1, valign: 'middle' },
+            headStyles: { textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center', lineWidth: 0 },
+            columnStyles: {
+                0: { cellWidth: 22, halign: 'center' },
+                // Allow auto sizing for the rest to fit in landscape naturally
+                12: { halign: 'center', fontStyle: 'bold' }
+            },
+            didParseCell: function(data) {
+                if (data.section === 'head') { 
+                    data.cell.styles.fillColor = null; 
+                    data.cell.styles.lineWidth = 0;
+                }
+                if (data.section === 'body') {
+                    // Alternate row colors based on DATE GROUP
+                    const rowData = bodyRows[data.row.index];
+                    const bgColor = rowData.group % 2 === 0 ? [255, 255, 255] : [235, 243, 255]; 
+                    data.cell.styles.fillColor = bgColor;
+                }
+            },
+            willDrawCell: function(data) {
+                if (data.section === 'head') {
+                    // Exact Gradient Header Code from your previous Web App
+                    let tableW = 277; // Roughly A4 Landscape usable width
+                    let relativeX = data.cell.x - 10; // offset margin
+                    
+                    for (let i = 0; i <= data.cell.width; i += 0.5) { 
+                        let ratio = (relativeX + i) / tableW;
+                        ratio = Math.max(0, Math.min(1, ratio));
+                        
+                        let r = Math.round(30 + (37 - 30) * ratio);
+                        let g = Math.round(58 + (99 - 58) * ratio);
+                        let b = Math.round(138 + (235 - 138) * ratio);
+                        
+                        doc.setFillColor(r, g, b);
+                        let rectWidth = Math.min(0.6, data.cell.width - i);
+                        doc.rect(data.cell.x + i, data.cell.y, rectWidth, data.cell.height, 'F');
+                    }
+                }
+            }
         });
 
-        // Footer
+        // Global Header & Footer (Runs on every page)
         const pageCount = doc.internal.getNumberOfPages();
+        const pageHeight = doc.internal.pageSize.height;
+        const pageWidth = doc.internal.pageSize.width;
+        
         for(let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
+            
+            // Header Bar
+            const headerHeight = 25;
+            for (let x = 0; x <= pageWidth; x += 0.5) {
+                let ratio = x / pageWidth;
+                let r = Math.round(15 + (30 - 15) * ratio);  
+                let g = Math.round(23 + (58 - 23) * ratio);
+                let b = Math.round(42 + (138 - 42) * ratio);
+                doc.setFillColor(r, g, b);
+                doc.rect(x, 0, 0.6, headerHeight, 'F'); 
+            }
+
+            // Footer Bar
+            const footerHeight = 12;
+            const footerY = pageHeight - footerHeight;
+            for (let x = 0; x <= pageWidth; x += 0.5) {
+                let ratio = x / pageWidth;
+                let r = Math.round(15 + (30 - 15) * ratio);
+                let g = Math.round(23 + (58 - 23) * ratio);
+                let b = Math.round(42 + (138 - 42) * ratio);
+                doc.setFillColor(r, g, b);
+                doc.rect(x, footerY, 0.6, footerHeight, 'F'); 
+            }
+
+            // Text on Header
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('SEARCH DATA WORK REPORT', pageWidth / 2, 10, {align:'center'});
+
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            const dRange = `FROM: ${formatDisplayDate(document.getElementById('startDate').value)}     TO: ${formatDisplayDate(document.getElementById('endDate').value)}`;
+            doc.text(dRange, pageWidth / 2, 18, {align:'center'});
+
+            // Text on Footer
             doc.setFontSize(9);
-            doc.setTextColor(100);
-            doc.text('Generated via Search Data App - Created by Gobind Sharma', 14, doc.internal.pageSize.height - 10);
-            doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 25, doc.internal.pageSize.height - 10);
+            doc.setTextColor(230, 240, 250);
+            doc.text('App Created By Gobind Sharma', 14, pageHeight - 4.5);
+            doc.text(`Page ${i} of ${pageCount}`, pageWidth - 20, pageHeight - 4.5);
         }
 
         return doc.output('blob');
