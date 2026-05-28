@@ -38,7 +38,7 @@
         .creator-text { margin-top: 8px; font-size: 13px; color: #94a3b8; font-weight: 600; }
 
         .form-row { display: flex; gap: 15px; margin-bottom: 16px; flex-wrap: wrap; }
-        .form-col { flex: 1; min-width: 200px; } 
+        .form-col { flex: 1; min-width: 250px; } 
         
         label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #cbd5e1; }
 
@@ -55,8 +55,8 @@
             opacity: 0; cursor: pointer; background: transparent;
         }
 
-        .btn-row { display: flex; justify-content: space-between; margin-top: 30px; gap: 15px; }
-        .btn { flex: 1; border: none; border-radius: 12px; padding: 14px 20px; font-size: 15px; font-weight: 800; cursor: pointer; transition: 0.3s; text-align: center; }
+        .btn-row { display: flex; justify-content: space-between; margin-top: 30px; }
+        .btn { border: none; border-radius: 12px; padding: 14px 30px; font-size: 15px; font-weight: 800; cursor: pointer; transition: 0.3s; }
         .btn-cancel { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.2); }
         .btn-save { background: #e11d48; color: white; box-shadow: 0 5px 15px rgba(225, 29, 72, 0.3); }
         .btn-save:hover { background: #be123c; }
@@ -115,42 +115,23 @@
 
         .card-collapsible { display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); }
 
-        /* Optimized Mobile/Desktop Grid for Group Tiles */
-        .summary-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(75px, 1fr)); 
-            gap: 12px; 
-            margin-bottom: 20px; 
-        }
-        .summary-box { 
-            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-            border: 1px solid rgba(255, 255, 255, 0.05); 
-            border-radius: 14px; 
-            padding: 14px 8px; 
-            text-align: center; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        .summary-number { font-size: 24px; font-weight: 900; color: #38bdf8; line-height: 1; }
-        .summary-label { font-size: 12px; color: #cbd5e1; margin-top: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;}
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 10px; margin-bottom: 16px; }
+        .summary-box { background: rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 8px; text-align: center; }
+        .summary-number { font-size: 20px; font-weight: 900; color: #38bdf8; }
+        .summary-label { font-size: 11px; color: #cbd5e1; margin-top: 4px; font-weight: bold; }
 
-        .action-btn-row { display: flex; gap: 12px; }
+        .action-btn-row { display: flex; gap: 10px; }
         .download-btn, .share-btn {
-            flex: 1; border: none; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: bold;
+            flex: 1; border: none; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: bold;
             cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; color: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
         .download-btn { background: linear-gradient(135deg, #16a34a, #22c55e); }
         .share-btn { background: linear-gradient(135deg, #2563eb, #38bdf8); }
 
         .back-btn {
-            background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.15);
-            padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 20px;
-            transition: 0.3s;
+            background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);
+            padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 16px;
         }
-        .back-btn:hover { background: rgba(255,255,255,0.15); }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -165,7 +146,6 @@
     <div class="header">
         <img src="gs.png" style="width: 80px; height: auto; margin-bottom: 12px; border-radius: 8px;" alt="Logo" onerror="this.style.display='none'">
         <div class="title">
-            <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
             Spring Report Generator
         </div>
         <div class="creator-text">App Created By Gobind Sharma</div>
@@ -410,8 +390,7 @@
 
         let allSummaryHtml = '<div class="summary-grid">';
         Object.keys(allGroupCounts).sort().forEach(g => {
-            let label = g === 'FAIL' ? 'Group FAIL' : `Group ${g}`;
-            allSummaryHtml += `<div class="summary-box"><div class="summary-number">${allGroupCounts[g]}</div><div class="summary-label">${label}</div></div>`;
+            allSummaryHtml += `<div class="summary-box"><div class="summary-number">${allGroupCounts[g]}</div><div class="summary-label">Group ${g}</div></div>`;
         });
         allSummaryHtml += '</div>';
 
@@ -445,8 +424,7 @@
 
             let summaryHtml = '<div class="summary-grid">';
             Object.keys(groupCounts).sort().forEach(g => {
-                let label = g === 'FAIL' ? 'Group FAIL' : `Group ${g}`;
-                summaryHtml += `<div class="summary-box"><div class="summary-number">${groupCounts[g]}</div><div class="summary-label">${label}</div></div>`;
+                summaryHtml += `<div class="summary-box"><div class="summary-number">${groupCounts[g]}</div><div class="summary-label">Group ${g}</div></div>`;
             });
             summaryHtml += '</div>';
 
@@ -484,14 +462,15 @@
         document.getElementById('formScreen').style.display = 'block';
     }
 
+    // Standard simple gradient drawing function
     function drawGradient(doc, x, y, w, h, startColor, endColor) {
-        for (let i = 0; i <= w; i += 1) { // width step of 1 to prevent rendering bugs
+        for (let i = 0; i <= w; i += 0.5) {
             let ratio = i / w;
             let cR = Math.round(startColor[0] + (endColor[0] - startColor[0]) * ratio);
             let cG = Math.round(startColor[1] + (endColor[1] - startColor[1]) * ratio);
             let cB = Math.round(startColor[2] + (endColor[2] - startColor[2]) * ratio);
             doc.setFillColor(cR, cG, cB);
-            doc.rect(x + i, y, 1.5, h, 'F'); // Overlap slice slightly to prevent subpixel gaps
+            doc.rect(x + i, y, 0.6, h, 'F');
         }
     }
 
@@ -627,16 +606,18 @@
                 doc.setFontSize(10); doc.setFont('helvetica', 'bold');
                 doc.text(`Code: ${code}`, pw - 40, 13, { align: 'center' });
 
-                // DETAILS CARD - Flawless Rounded Clip Path + Dark Slate Gradient
+                // DETAILS CARD - Using Clipping Path for Perfect Vector Rounded Gradient
                 let cardY = 25; 
                 let cardH = 22;
                 
-                doc.saveGraphicsState();
-                doc.roundedRect(5, cardY, pw - 10, cardH, 3, 3, null);
-                doc.clip();
-                // Deep slate gradient - strongly contrasts and allows badges to perfectly pop
-                drawGradient(doc, 5, cardY - 1, pw - 10, cardH + 2, [30, 41, 59], [15, 23, 42]); 
-                doc.restoreGraphicsState();
+                doc.saveGraphicsState(); // Save state before clipping
+                doc.roundedRect(5, cardY, pw - 10, cardH, 3, 3, null); // Define perfect rounded vector path
+                doc.clip(); // Mask everything inside this path
+                
+                // Draw distinct Emerald gradient, which is now cleanly clipped by the vector path
+                drawGradient(doc, 5, cardY, pw - 10, cardH, [2, 44, 34], [16, 185, 129]); 
+                
+                doc.restoreGraphicsState(); // Release clipping mask
                 
                 let col1X = 15, col2X = pw/2 - 40, col3X = pw - 50;
                 doc.setTextColor(255, 255, 255); doc.setFontSize(9);
@@ -655,28 +636,14 @@
 
                 let badgeY = cardY + 8;
                 let badgeX = pw/2 + 25;
-
-                // Badge A with Drop Shadow
-                doc.saveGraphicsState(); doc.setGState(new doc.GState({opacity: 0.35}));
-                doc.setFillColor(0, 0, 0); doc.roundedRect(badgeX + 0.6, badgeY + 0.6, 15, 6, 2, 2, 'F');
-                doc.restoreGraphicsState();
                 doc.setFillColor(253, 224, 71); doc.roundedRect(badgeX, badgeY, 15, 6, 2, 2, 'F');
                 doc.setTextColor(0); doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.text(`A - ${countA}`, badgeX + 7.5, badgeY + 4.2, {align: 'center'});
 
-                // Badge B with Drop Shadow
-                doc.saveGraphicsState(); doc.setGState(new doc.GState({opacity: 0.35}));
-                doc.setFillColor(0, 0, 0); doc.roundedRect(badgeX + 20.6, badgeY + 0.6, 15, 6, 2, 2, 'F');
-                doc.restoreGraphicsState();
                 doc.setFillColor(59, 130, 246); doc.roundedRect(badgeX + 20, badgeY, 15, 6, 2, 2, 'F');
                 doc.setTextColor(255); doc.text(`B - ${countB}`, badgeX + 27.5, badgeY + 4.2, {align: 'center'});
 
-                // Badge C with Drop Shadow
-                doc.saveGraphicsState(); doc.setGState(new doc.GState({opacity: 0.35}));
-                doc.setFillColor(0, 0, 0); doc.roundedRect(badgeX + 40.6, badgeY + 0.6, 15, 6, 2, 2, 'F');
-                doc.restoreGraphicsState();
                 doc.setFillColor(34, 197, 94); doc.roundedRect(badgeX + 40, badgeY, 15, 6, 2, 2, 'F');
                 doc.setTextColor(0); doc.text(`C - ${countC}`, badgeX + 47.5, badgeY + 4.2, {align: 'center'});
-
             } else {
                 drawGradient(doc, 0, 0, pw, 12, [15, 23, 42], [30, 58, 138]);
                 doc.setFontSize(11); doc.setFont('helvetica', 'bold');
