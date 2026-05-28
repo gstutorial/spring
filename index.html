@@ -33,13 +33,13 @@
             box-shadow: 0 15px 50px rgba(0,0,0,0.45);
         }
 
-        .header { text-align: center; margin-bottom: 25px; }
+        .header { text-align: center; margin-bottom: 25px; display: flex; flex-direction: column; align-items: center; }
         .title { font-size: 26px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .creator-text { margin-top: 8px; font-size: 13px; color: #94a3b8; font-weight: 600; }
 
-        .form-group { margin-bottom: 16px; }
-        .form-row { display: flex; gap: 15px; margin-bottom: 16px; }
-        .form-col { flex: 1; }
+        .form-row { display: flex; gap: 15px; margin-bottom: 16px; flex-wrap: wrap; }
+        .form-col { flex: 1; min-width: 250px; } /* Side-by-side on desktop, stacks on mobile */
+        
         label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #cbd5e1; }
 
         .input-box {
@@ -48,6 +48,13 @@
         }
         .input-box:focus { border-color: #38bdf8; background: rgba(255,255,255,0.1); }
         .input-box option { background: #0f172a; color: white; }
+
+        /* Full Box Clickable Date Picker on Desktop */
+        .input-box[type="date"] { position: relative; cursor: pointer; }
+        .input-box[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute; top: 0; right: 0; width: 100%; height: 100%;
+            opacity: 0; cursor: pointer; background: transparent;
+        }
 
         .btn-row { display: flex; justify-content: space-between; margin-top: 30px; }
         .btn { border: none; border-radius: 12px; padding: 14px 30px; font-size: 15px; font-weight: 800; cursor: pointer; transition: 0.3s; }
@@ -137,6 +144,7 @@
 
 <div class="container">
     <div class="header">
+        <img src="gs.png" style="width: 80px; height: auto; margin-bottom: 12px; border-radius: 8px;" alt="Logo" onerror="this.style.display='none'">
         <div class="title">
             <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
             Spring Report Generator
@@ -148,18 +156,35 @@
         <div class="form-row">
             <div class="form-col">
                 <label>Start Date <span style="color:red">*</span></label>
-                <input type="date" id="startDate" class="input-box" required>
+                <input type="date" id="startDate" class="input-box" required onclick="this.showPicker && this.showPicker()">
             </div>
             <div class="form-col">
                 <label>End Date <span style="color:red">*</span></label>
-                <input type="date" id="endDate" class="input-box" required>
+                <input type="date" id="endDate" class="input-box" required onclick="this.showPicker && this.showPicker()">
             </div>
         </div>
 
-        <div class="form-group"><label>Code</label><select id="selCode" class="input-box"><option value="">-- All --</option></select></div>
-        <div class="form-group"><label>Group</label><select id="selGroup" class="input-box"><option value="">-- All --</option></select></div>
-        <div class="form-group"><label>Make</label><select id="selMake" class="input-box"><option value="">-- All --</option></select></div>
-        <div class="form-group"><label>User Name (Tested By)</label><select id="selUser" class="input-box"><option value="">-- All --</option></select></div>
+        <div class="form-row">
+            <div class="form-col">
+                <label>Code</label>
+                <select id="selCode" class="input-box"><option value="">-- All --</option></select>
+            </div>
+            <div class="form-col">
+                <label>Group</label>
+                <select id="selGroup" class="input-box"><option value="">-- All --</option></select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-col">
+                <label>Make</label>
+                <select id="selMake" class="input-box"><option value="">-- All --</option></select>
+            </div>
+            <div class="form-col">
+                <label>User Name (Tested By)</label>
+                <select id="selUser" class="input-box"><option value="">-- All --</option></select>
+            </div>
+        </div>
 
         <div id="loader">Fetching and processing data...</div>
 
@@ -170,13 +195,6 @@
     </div>
 
     <div id="resultsScreen">
-        <div style="text-align: center; margin-bottom: 24px;">
-            <img src="gs.png" style="width: 100px; height: auto; margin-bottom: 12px; border-radius: 8px;" alt="Logo" onerror="this.style.display='none'">
-            <h2 style="color: #38bdf8;">Reports Generated</h2>
-            <p style="color: #cbd5e1; font-size: 15px; font-weight: bold; margin-top: 4px;" id="totalRecordsText">0 Total Records Found</p>
-            <div style="margin-top: 10px; font-size: 13px; color: #94a3b8; font-weight: 600;">App Created By Gobind Sharma</div>
-        </div>
-
         <div id="codeCardsContainer"></div>
 
         <button class="back-btn" onclick="goBack()">
@@ -354,7 +372,6 @@
                 groupedFilteredData[code].sort((a,b) => a.normalizedDateObj - b.normalizedDateObj);
             });
 
-            document.getElementById('totalRecordsText').innerText = `${filteredData.length} Total Records Found`;
             renderCodeCards();
 
             document.getElementById('formScreen').style.display = 'none';
@@ -366,7 +383,6 @@
         const container = document.getElementById('codeCardsContainer');
         container.innerHTML = '';
 
-        // Calculate summary for 'All Report' card
         const allGroupCounts = {};
         Object.values(groupedFilteredData).flat().forEach(r => { 
             const grp = (r[COL_GROUP] || 'Blank').toUpperCase(); 
@@ -379,7 +395,6 @@
         });
         allSummaryHtml += '</div>';
 
-        // Add 'All Report' Card
         const allCard = document.createElement('div');
         allCard.className = 'code-card all-card';
         allCard.innerHTML = `
@@ -419,7 +434,8 @@
             card.innerHTML = `
                 <div class="card-header-toggle" onclick="toggleCard('${safeId}')">
                     <div class="header-left">
-                        <div class="code-icon">${code.substring(0,3)}</div> <div><div class="code-title">Code: ${code}</div><div class="code-subtitle">${dataRows.length} Entries</div></div>
+                        <div class="code-icon">${code.substring(0,3)}</div>
+                        <div><div class="code-title">Code: ${code}</div><div class="code-subtitle">${dataRows.length} Entries</div></div>
                     </div>
                     <div class="toggle-arrow" id="arrow-${safeId}">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -447,18 +463,47 @@
         document.getElementById('formScreen').style.display = 'block';
     }
 
-    function drawGradient(doc, x, y, w, h, startColor, endColor) {
+    // Upgraded drawGradient to dynamically support true rounded borders via mathematical clipping
+    function drawGradient(doc, x, y, w, h, startColor, endColor, radius = 0) {
         for (let i = 0; i <= w; i += 0.5) {
             let ratio = i / w;
-            let r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * ratio);
-            let g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * ratio);
-            let b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * ratio);
-            doc.setFillColor(r, g, b);
-            doc.rect(x + i, y, 0.6, h, 'F');
+            let cR = Math.round(startColor[0] + (endColor[0] - startColor[0]) * ratio);
+            let cG = Math.round(startColor[1] + (endColor[1] - startColor[1]) * ratio);
+            let cB = Math.round(startColor[2] + (endColor[2] - startColor[2]) * ratio);
+            doc.setFillColor(cR, cG, cB);
+            
+            let sliceY = y;
+            let sliceH = h;
+            
+            // Adjust slice start and height at corners for a border-radius effect
+            if (radius > 0) {
+                if (i < radius) {
+                    let dx = radius - i;
+                    let dy = radius - Math.sqrt(Math.max(0, radius * radius - dx * dx));
+                    sliceY = y + dy;
+                    sliceH = h - 2 * dy;
+                } else if (i > w - radius) {
+                    let dx = i - (w - radius);
+                    let dy = radius - Math.sqrt(Math.max(0, radius * radius - dx * dx));
+                    sliceY = y + dy;
+                    sliceH = h - 2 * dy;
+                }
+            }
+            doc.rect(x + i, sliceY, 0.6, sliceH, 'F');
         }
     }
 
-    function buildCodePdfBlock(doc, code, dataToPrint, isFirstCodeObj) {
+    // Color palettes to rotate through when new codes generate
+    const colorPalettes = [
+        { start: [15, 23, 42], end: [30, 58, 138] },      // Blue
+        { start: [2, 44, 34], end: [16, 185, 129] },      // Emerald
+        { start: [59, 7, 100], end: [147, 51, 234] },     // Purple
+        { start: [76, 5, 25], end: [225, 29, 72] },       // Rose
+        { start: [69, 26, 3], end: [217, 119, 6] },       // Amber
+        { start: [15, 23, 42], end: [14, 116, 144] }      // Cyan
+    ];
+
+    function buildCodePdfBlock(doc, code, dataToPrint, isFirstCodeObj, codeIndex = 0) {
         if (!isFirstCodeObj.val) doc.addPage();
         isFirstCodeObj.val = false;
 
@@ -485,25 +530,19 @@
         });
 
         const failSummaryArr = Object.values(failSummaryMap);
-
         const bodyRows = [];
-        let i = 0;
-        let currentGroup = -1;
-        let failIdx = 0;
+        let i = 0, currentGroup = -1, failIdx = 0;
 
         while (i < dataToPrint.length) {
             let startRow = dataToPrint[i];
             let displayDate = startRow.displayDate;
             let span = 1;
-            while (i + span < dataToPrint.length && dataToPrint[i + span].displayDate === displayDate) {
-                span++;
-            }
+            while (i + span < dataToPrint.length && dataToPrint[i + span].displayDate === displayDate) span++;
             
             currentGroup++;
             
             for (let j = 0; j < span; j++) {
                 let r = dataToPrint[i + j];
-                
                 let cause = '', fMake = '', fTotal = '';
                 if (failIdx < failSummaryArr.length) {
                     cause = failSummaryArr[failIdx].cause;
@@ -518,11 +557,7 @@
                     r[COL_USER] || '', cause, fMake, fTotal
                 ];
 
-                bodyRows.push({
-                    rawDate: displayDate,
-                    row: innerRow,
-                    grpIdx: currentGroup
-                });
+                bodyRows.push({ rawDate: displayDate, row: innerRow, grpIdx: currentGroup });
             }
             i += span;
         }
@@ -551,7 +586,6 @@
             ],
             body: bodyRows.map(r => r.row),
             theme: 'grid',
-            // Centering horizontally and vertically on all tables
             styles: { fontSize: 7, cellPadding: 2, lineColor: [200, 200, 200], lineWidth: 0.1, valign: 'middle', halign: 'center', textColor: 0 },
             headStyles: { lineWidth: 0, textColor: 255, halign: 'center' },
             didParseCell: function(data) {
@@ -581,11 +615,11 @@
             willDrawCell: function(data) {
                 if (data.section === 'head') {
                     if (data.row.index === 0) {
-                        if (data.column.index === 0) drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [15, 23, 42], [30, 58, 138]);
-                        if (data.column.index === 10) drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [159, 18, 57], [220, 38, 38]);
+                        if (data.column.index === 0) drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [15, 23, 42], [30, 58, 138], 0);
+                        if (data.column.index === 10) drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [159, 18, 57], [220, 38, 38], 0);
                     } else if (data.row.index === 1) {
-                        if (data.column.index < 10) drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [15, 23, 42], [30, 58, 138]);
-                        else drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [159, 18, 57], [220, 38, 38]);
+                        if (data.column.index < 10) drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [15, 23, 42], [30, 58, 138], 0);
+                        else drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [159, 18, 57], [220, 38, 38], 0);
                     }
                 }
                 
@@ -594,46 +628,43 @@
                     let isFirstOnPage = data.row.index === 0 || (data.table.body[data.row.index - 1].pageNumber !== data.row.pageNumber);
                     let isFirstInGroup = data.row.index === 0 || bodyRows[data.row.index - 1].rawDate !== rowInfo.rawDate;
                     
-                    if (!isFirstOnPage && !isFirstInGroup) {
-                        data.cell.text = ''; 
-                    }
+                    if (!isFirstOnPage && !isFirstInGroup) data.cell.text = ''; 
                 }
             }
         });
 
         let endPage = doc.internal.getCurrentPageInfo().pageNumber;
+        const cardColor = colorPalettes[codeIndex % colorPalettes.length]; // Dynamically get palette for this Code
 
         for (let p = startPage; p <= endPage; p++) {
             doc.setPage(p);
             
             // DRAW TOP HEADER (ON ALL PAGES)
-            drawGradient(doc, 0, 0, pw, 22, [15, 23, 42], [30, 58, 138]);
-            
-            try {
-                const img = document.getElementById('pdfLogo');
-                if (img && !img.dataset.failed) doc.addImage(img, 'PNG', 5, 2, 18, 18);
-            } catch(e) {}
+            drawGradient(doc, 0, 0, pw, 22, [15, 23, 42], [30, 58, 138], 0);
             
             doc.setTextColor(255, 255, 255); 
-            doc.setFontSize(16); doc.setFont('helvetica', 'bold');
-            doc.text("Spring Report", pw / 2, 8, { align: 'center' });
             
-            doc.setFontSize(9); doc.setFont('helvetica', 'bold');
-            doc.text("SSE/BSS/NBQS", pw / 2, 13, { align: 'center' });
-            
-            doc.setFont('helvetica', 'normal');
-            doc.text("App Created By Gobind Sharma", pw / 2, 18, { align: 'center' });
-
-            // Ensure Code shows top right on ALL pages
-            doc.setFontSize(10); doc.setFont('helvetica', 'bold');
             if (p === startPage) {
-                doc.text(`Code: ${code}`, pw - 40, 13, { align: 'center' });
+                // First Page Text Elements Only
+                try {
+                    const img = document.getElementById('pdfLogo');
+                    if (img && !img.dataset.failed) doc.addImage(img, 'PNG', 5, 2, 18, 18);
+                } catch(e) {}
                 
-                // Rounded corner details card below header on First page
+                doc.setFontSize(16); doc.setFont('helvetica', 'bold');
+                doc.text("Spring Report", pw / 2, 8, { align: 'center' });
+                doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+                doc.text("SSE/BSS/NBQS", pw / 2, 13, { align: 'center' });
+                doc.setFont('helvetica', 'normal');
+                doc.text("App Created By Gobind Sharma", pw / 2, 18, { align: 'center' });
+
+                doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+                doc.text(`Code: ${code}`, pw - 40, 13, { align: 'center' });
+
+                // DETAILS CARD (Using Dynamic Gradients & Rounded Edge Radius parameter = 3)
                 let cardY = 25; 
                 let cardH = 22;
-                doc.setFillColor(22, 40, 90); 
-                doc.roundedRect(5, cardY, pw - 10, cardH, 3, 3, 'F');
+                drawGradient(doc, 5, cardY, pw - 10, cardH, cardColor.start, cardColor.end, 3);
                 
                 let col1X = 15, col2X = pw/2 - 40, col3X = pw - 50;
                 doc.setTextColor(255, 255, 255); doc.setFontSize(9);
@@ -650,7 +681,6 @@
                 doc.setFont('helvetica', 'bold'); doc.text("Pass:", col3X, cardY + 12); doc.setFont('helvetica', 'normal'); doc.text(pass.toString(), col3X + 15, cardY + 12);
                 doc.setFont('helvetica', 'bold'); doc.text("Fail:", col3X, cardY + 18); doc.setFont('helvetica', 'normal'); doc.text(fail.toString(), col3X + 15, cardY + 18);
 
-                // Badges
                 let badgeY = cardY + 8;
                 let badgeX = pw/2 + 25;
                 doc.setFillColor(253, 224, 71); doc.roundedRect(badgeX, badgeY, 15, 6, 2, 2, 'F');
@@ -662,12 +692,14 @@
                 doc.setFillColor(34, 197, 94); doc.roundedRect(badgeX + 40, badgeY, 15, 6, 2, 2, 'F');
                 doc.setTextColor(0); doc.text(`C - ${countC}`, badgeX + 47.5, badgeY + 4.2, {align: 'center'});
             } else {
-                doc.text(`Code: ${code} (Continued)`, pw - 40, 13, { align: 'center' });
+                // Continuation page header (Main title text is skipped)
+                doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+                doc.text(`Code: ${code} (Continued)`, pw / 2, 13, { align: 'center' });
             }
 
             // DRAW FOOTER (ON ALL PAGES)
             const ph = doc.internal.pageSize.height;
-            drawGradient(doc, 0, ph - 10, pw, 10, [15, 23, 42], [30, 58, 138]);
+            drawGradient(doc, 0, ph - 10, pw, 10, [15, 23, 42], [30, 58, 138], 0);
             doc.setTextColor(255, 255, 255); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
             doc.text("App Created By Gobind Sharma", 10, ph - 4);
             doc.text(`Page ${p}`, pw - 15, ph - 4);
@@ -685,10 +717,11 @@
         if (isAll) {
             const codes = Object.keys(groupedFilteredData);
             for(let i = 0; i < codes.length; i++) {
-                buildCodePdfBlock(doc, codes[i], groupedFilteredData[codes[i]], isFirstCodeObj);
+                // Passing iterator 'i' drives the color palette rotation
+                buildCodePdfBlock(doc, codes[i], groupedFilteredData[codes[i]], isFirstCodeObj, i);
             }
         } else {
-            buildCodePdfBlock(doc, targetCode, groupedFilteredData[targetCode], isFirstCodeObj);
+            buildCodePdfBlock(doc, targetCode, groupedFilteredData[targetCode], isFirstCodeObj, 0);
         }
         
         return doc.output('blob');
