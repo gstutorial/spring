@@ -244,9 +244,7 @@
             for (let i = 1; i < codeLines.length; i++) {
                 const row = parseCSVLine(codeLines[i]);
                 if (row[idxC]) {
-                    codeDetailsMap[row[idxC]] = { 
-                        bogie: row[idxB] || 'N/A', spring: row[idxS] || 'N/A', load: row[idxL] || 'N/A' 
-                    };
+                    codeDetailsMap[row[idxC]] = { bogie: row[idxB] || 'N/A', spring: row[idxS] || 'N/A', load: row[idxL] || 'N/A' };
                 }
             }
 
@@ -279,10 +277,7 @@
             populateSelect('selUser', [...users].sort());
             populateSelect('selCode', [...codes].sort());
 
-        } catch (error) {
-            console.error(error);
-            showToast("Failed to load Google Sheet data.");
-        }
+        } catch (error) { showToast("Failed to load Google Sheet data."); }
     }
 
     function populateSelect(id, values) {
@@ -444,7 +439,7 @@
             const grp = (r[COL_GROUP] || '').toUpperCase();
             if (grp === 'FAIL') {
                 fail++;
-                let cause = r[COL_REMARK] || 'Unknown';
+                let cause = r[COL_REMARK] || 'Unknown'; 
                 let make = r[COL_MAKE] || '-';
                 let key = cause + '|' + make;
                 if(!failSummaryMap[key]) failSummaryMap[key] = { cause, make, count: 0 };
@@ -457,20 +452,11 @@
         });
 
         const failSummaryArr = Object.values(failSummaryMap);
-
-        const dateCounts = {};
-        dataToPrint.forEach(r => {
-            const d = r.displayDate;
-            dateCounts[d] = (dateCounts[d] || 0) + 1;
-        });
-
         const bodyRows = [];
         let currentGroup = -1;
-        let previousDate = '';
 
+        // Populate Custom Pre-Merged Data Array
         dataToPrint.forEach((r, idx) => {
-            let displayDate = r.displayDate;
-            
             let cause = '', fMake = '', fTotal = '';
             if (idx < failSummaryArr.length) {
                 cause = failSummaryArr[idx].cause;
@@ -478,30 +464,20 @@
                 fTotal = failSummaryArr[idx].count.toString();
             }
 
-            // Mapped correctly: COL_CAUSE to Remark, COL_REMARK to Cause of Failure
+            // Important: Replace 'Remark' column with 'Cause of Failure' (COL_CAUSE = 10)
             let innerRow = [
                 r[COL_MAKE] || '', r[COL_MFG] || '', r[COL_SL] || '', r[COL_FREE_HT] || '', 
                 r[COL_HT_LOAD] || '', r[COL_GROUP] || '', r[COL_CRACK] || '', r[COL_CAUSE] || '', 
                 r[COL_USER] || '', cause, fMake, fTotal
             ];
 
-            if (displayDate !== previousDate) {
-                currentGroup++;
-                // Exact rowSpan structure that works perfectly
-                bodyRows.push({
-                    row: [
-                        { content: displayDate, rowSpan: dateCounts[displayDate], styles: { valign: 'middle', halign: 'center', fontStyle: 'bold' } }, 
-                        ...innerRow
-                    ],
-                    group: currentGroup
-                });
-                previousDate = displayDate;
-            } else {
-                bodyRows.push({
-                    row: innerRow,
-                    group: currentGroup
-                });
-            }
+            if (idx === 0 || r.displayDate !== dataToPrint[idx - 1].displayDate) currentGroup++;
+
+            bodyRows.push({
+                rawDate: r.displayDate,
+                row: innerRow,
+                grpIdx: currentGroup
+            });
         });
 
         const formatForHeader = (dateStr) => {
@@ -512,13 +488,14 @@
         
         const startDateStr = formatForHeader(document.getElementById('startDate').value);
         const endDateStr = formatForHeader(document.getElementById('endDate').value);
+        
         const pw = doc.internal.pageSize.width;
         let startPage = doc.internal.getCurrentPageInfo().pageNumber;
 
-        // AutoTable handles the table layout & native rowSpan natively
+        // Custom AutoTable Render
         doc.autoTable({
-            startY: 65, // Leaves space for the big Details Card on Page 1
-            margin: { top: 18, left: 5, right: 5, bottom: 12 }, // On continued pages, leave 18px for the top header
+            startY: 63, // Safely below the Card on Page 1
+            margin: { top: 20, left: 5, right: 5, bottom: 15 },
             head: [
                 [ 
                     { content: 'Daily Working Report', colSpan: 10 },
@@ -526,24 +503,42 @@
                 ],
                 [ 'Date', 'Make', 'Mfg. Date', 'SL. No.', 'Free Height', 'Height Under Load', 'Group', 'Crack', 'Remark', 'Tested By', 'Cause of Failure', 'Make', 'Total' ]
             ],
-            body: bodyRows.map(r => r.row),
+            body: bodyRows.map(r => [''].concat(r.row)), // Inject empty string for Date column initially
             theme: 'grid',
-            styles: { fontSize: 7.5, cellPadding: 2, lineColor: [200, 200, 200], lineWidth: 0.1, valign: 'middle', textColor: 0 },
-            headStyles: { lineWidth: 0, textColor: 255, halign: 'center' },
+            styles: { fontSize: 7, cellPadding: 2, lineColor: [200, 200, 200], lineWidth: 0.1, valign: 'middle', textColor: 0 },
             didParseCell: function(data) {
-                if (data.section === 'head' && data.row.index === 1) {
-                    if (data.column.index === 9) {
+                if (data.section === 'head') {
+                    data.cell.styles.halign = 'center';
+                    data.cell.styles.textColor = 255;
+                    data.cell.styles.lineWidth = 0;
+                    if (data.row.index === 1 && data.column.index === 9) {
                         data.cell.styles.textColor = 0; // Black text on Yellow
                     }
                 }
                 if (data.section === 'body') {
-                    const rowData = bodyRows[data.row.index];
+                    const rowInfo = bodyRows[data.row.index];
+                    
+                    // Custom Visual Merging for Date Column
+                    if (data.column.index === 0) {
+                        let isFirstOnPage = data.row.index === 0 || (data.table.body[data.row.index - 1].pageNumber !== data.row.pageNumber);
+                        let isFirstInGroup = data.row.index === 0 || bodyRows[data.row.index - 1].rawDate !== rowInfo.rawDate;
+
+                        if (!isFirstOnPage && !isFirstInGroup) {
+                            data.cell.text = ''; 
+                            data.cell.styles.lineWidth = { top: 0, right: 0.1, bottom: 0.1, left: 0.1 };
+                        } else {
+                            data.cell.text = rowInfo.rawDate;
+                            data.cell.styles.fontStyle = 'bold';
+                            data.cell.styles.halign = 'center';
+                            data.cell.styles.valign = 'middle'; // Center aligned as requested
+                        }
+                    }
+
+                    // Alternate Colors
                     if (data.column.index < 10) {
-                        // Alternate based on the Date Group
-                        data.cell.styles.fillColor = rowData.group % 2 === 0 ? [255, 255, 255] : [235, 243, 255]; 
+                        data.cell.styles.fillColor = rowInfo.grpIdx % 2 === 0 ? [255, 255, 255] : [240, 248, 255]; 
                     } else {
-                        // Alternate row by row for Failure Report
-                        data.cell.styles.fillColor = data.row.index % 2 === 0 ? [255, 255, 255] : [255, 235, 235]; 
+                        data.cell.styles.fillColor = data.row.index % 2 === 0 ? [255, 255, 255] : [255, 240, 240]; 
                         if(data.column.index === 12) data.cell.styles.halign = 'center'; 
                     }
                 }
@@ -555,7 +550,7 @@
                         if (data.column.index === 10) drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [159, 18, 57], [244, 63, 94]);
                     } else if (data.row.index === 1) {
                         if (data.column.index < 9) drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [30, 58, 138], [56, 189, 248]);
-                        else if (data.column.index === 9) { doc.setFillColor(253, 224, 71); doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F'); doc.setTextColor(0); } 
+                        else if (data.column.index === 9) { doc.setFillColor(253, 224, 71); doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F'); } 
                         else drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [159, 18, 57], [244, 63, 94]);
                     }
                 }
@@ -564,12 +559,12 @@
 
         let endPage = doc.internal.getCurrentPageInfo().pageNumber;
 
-        // Render Page Headers and Footers
+        // Master Layout Elements
         for (let p = startPage; p <= endPage; p++) {
             doc.setPage(p);
             
             if (p === startPage) {
-                // ================= FULL HEADER (First Page of Code) =================
+                // ================= FULL HEADER (First Page) =================
                 drawGradient(doc, 0, 0, pw, 28, [30, 58, 138], [56, 189, 248]);
                 
                 try {
@@ -578,10 +573,7 @@
                 } catch(e) {}
                 
                 doc.setTextColor(255); 
-                doc.setFontSize(12); doc.setFont('helvetica', 'bold');
-                doc.text("G.S Solutions", 32, 16);
-
-                doc.setFontSize(22);
+                doc.setFontSize(22); doc.setFont('helvetica', 'bold');
                 doc.text("Spring Report", pw / 2, 12, { align: 'center' });
 
                 doc.setFontSize(10);
@@ -590,43 +582,47 @@
                 doc.setFontSize(9); doc.setFont('helvetica', 'normal');
                 doc.text("App Created By Gobind Sharma", pw / 2, 24, { align: 'center' });
 
-                // DETAILS CARD
+                // ================= DETAILS CARD =================
                 let cardY = 28;
                 let cardH = 26;
-                drawGradient(doc, 0, cardY, pw, cardH, [30, 58, 138], [56, 189, 248]);
-                
-                doc.setTextColor(255); doc.setFontSize(10);
-                
-                // Col 1
-                doc.setFont('helvetica', 'bold'); doc.text("From Date:", 10, cardY + 7); doc.setFont('helvetica', 'normal'); doc.text(startDateStr, 35, cardY + 7);
-                doc.setFont('helvetica', 'bold'); doc.text("To Date:", 10, cardY + 14); doc.setFont('helvetica', 'normal'); doc.text(endDateStr, 35, cardY + 14);
-                doc.setFont('helvetica', 'bold'); doc.text("Code:", 10, cardY + 21); doc.setFont('helvetica', 'normal'); doc.text(code, 35, cardY + 21);
-                
-                // Col 2
-                doc.setFont('helvetica', 'bold'); doc.text("Type of Bogies:", pw/2 - 50, cardY + 7); doc.setFont('helvetica', 'normal'); doc.text(details.bogie, pw/2 - 15, cardY + 7);
-                doc.setFont('helvetica', 'bold'); doc.text("Type of Spring:", pw/2 - 50, cardY + 14); doc.setFont('helvetica', 'normal'); doc.text(details.spring, pw/2 - 15, cardY + 14);
-                doc.setFont('helvetica', 'bold'); doc.text("Load:", pw/2 - 50, cardY + 21); doc.setFont('helvetica', 'normal'); doc.text(details.load, pw/2 - 15, cardY + 21);
+                // Soft elegant blue gradient for card body
+                drawGradient(doc, 0, cardY, pw, cardH, [235, 245, 255], [220, 235, 250]);
+                doc.setDrawColor(200, 210, 230); doc.setLineWidth(0.5);
+                doc.line(0, cardY + cardH, pw, cardY + cardH); // bottom border
 
-                // Col 3
-                doc.setFont('helvetica', 'bold'); doc.text("Total:", pw - 45, cardY + 7); doc.setFont('helvetica', 'normal'); doc.text(total.toString(), pw - 30, cardY + 7);
-                doc.setFont('helvetica', 'bold'); doc.text("Pass:", pw - 45, cardY + 14); doc.setFont('helvetica', 'normal'); doc.text(pass.toString(), pw - 30, cardY + 14);
-                doc.setFont('helvetica', 'bold'); doc.text("Fail:", pw - 45, cardY + 21); doc.setFont('helvetica', 'normal'); doc.text(fail.toString(), pw - 30, cardY + 21);
+                let col1X = 15, col2X = pw/2 - 40, col3X = pw - 50;
+                
+                doc.setTextColor(30, 50, 80); doc.setFontSize(9);
+                
+                doc.setFont('helvetica', 'bold'); doc.text("From Date:", col1X, cardY + 8); doc.setFont('helvetica', 'normal'); doc.text(startDateStr, col1X + 22, cardY + 8);
+                doc.setFont('helvetica', 'bold'); doc.text("To Date:", col1X, cardY + 15); doc.setFont('helvetica', 'normal'); doc.text(endDateStr, col1X + 22, cardY + 15);
+                doc.setFont('helvetica', 'bold'); doc.text("Code:", col1X, cardY + 22); doc.setFont('helvetica', 'normal'); doc.text(code, col1X + 22, cardY + 22);
+                
+                doc.setFont('helvetica', 'bold'); doc.text("Type of Bogies:", col2X, cardY + 8); doc.setFont('helvetica', 'normal'); doc.text(details.bogie, col2X + 28, cardY + 8);
+                doc.setFont('helvetica', 'bold'); doc.text("Type of Spring:", col2X, cardY + 15); doc.setFont('helvetica', 'normal'); doc.text(details.spring, col2X + 28, cardY + 15);
+                doc.setFont('helvetica', 'bold'); doc.text("Load:", col2X, cardY + 22); doc.setFont('helvetica', 'normal'); doc.text(details.load, col2X + 28, cardY + 22);
+
+                doc.setFont('helvetica', 'bold'); doc.text("Total:", col3X, cardY + 8); doc.setFont('helvetica', 'normal'); doc.text(total.toString(), col3X + 15, cardY + 8);
+                doc.setFont('helvetica', 'bold'); doc.text("Pass:", col3X, cardY + 15); doc.setFont('helvetica', 'normal'); doc.text(pass.toString(), col3X + 15, cardY + 15);
+                doc.setFont('helvetica', 'bold'); doc.text("Fail:", col3X, cardY + 22); doc.setFont('helvetica', 'normal'); doc.text(fail.toString(), col3X + 15, cardY + 22);
 
                 // Badges
-                let pillY = cardY + 9;
-                doc.setFillColor(253, 224, 71); doc.rect(pw/2 + 30, pillY, 16, 5, 'F');
-                doc.setTextColor(0); doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.text(`A - ${countA}`, pw/2 + 38, pillY + 3.5, {align: 'center'});
+                let badgeY = cardY + 10;
+                let badgeX = pw/2 + 25;
                 
-                doc.setFillColor(37, 99, 235); doc.rect(pw/2 + 50, pillY, 16, 5, 'F');
-                doc.setTextColor(255); doc.text(`B - ${countB}`, pw/2 + 58, pillY + 3.5, {align: 'center'});
-                
-                doc.setFillColor(34, 197, 94); doc.rect(pw/2 + 70, pillY, 16, 5, 'F');
-                doc.setTextColor(0); doc.text(`C - ${countC}`, pw/2 + 78, pillY + 3.5, {align: 'center'});
+                doc.setFillColor(253, 224, 71); doc.roundedRect(badgeX, badgeY, 15, 6, 2, 2, 'F');
+                doc.setTextColor(0); doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.text(`A - ${countA}`, badgeX + 7.5, badgeY + 4.2, {align: 'center'});
+
+                doc.setFillColor(59, 130, 246); doc.roundedRect(badgeX + 20, badgeY, 15, 6, 2, 2, 'F');
+                doc.setTextColor(255); doc.text(`B - ${countB}`, badgeX + 27.5, badgeY + 4.2, {align: 'center'});
+
+                doc.setFillColor(34, 197, 94); doc.roundedRect(badgeX + 40, badgeY, 15, 6, 2, 2, 'F');
+                doc.setTextColor(0); doc.text(`C - ${countC}`, badgeX + 47.5, badgeY + 4.2, {align: 'center'});
 
             } else {
-                // ================= SIMPLE HEADER (Continuation Pages) =================
+                // ================= SLIM HEADER (Continued Pages) =================
                 drawGradient(doc, 0, 0, pw, 15, [30, 58, 138], [56, 189, 248]);
-                doc.setTextColor(255); doc.setFontSize(12); doc.setFont('helvetica', 'bold');
+                doc.setTextColor(255); doc.setFontSize(11); doc.setFont('helvetica', 'bold');
                 doc.text(`Spring Report - Code: ${code} (Continued)`, pw / 2, 10, { align: 'center' });
             }
 
