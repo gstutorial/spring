@@ -34,17 +34,15 @@
         }
 
         .logo {
-            width: 100px; height: 100px; object-fit: contain; display: block; margin: 0 auto 15px auto;
+            width: 90px; height: 90px; object-fit: contain; display: block; margin: 0 auto 10px auto;
         }
 
         .header { text-align: center; margin-bottom: 25px; }
         .title { font-size: 28px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .creator-text { margin-top: 8px; font-size: 13px; color: #94a3b8; font-weight: 600; }
+        .creator-text { margin-top: 5px; font-size: 13px; color: #94a3b8; font-weight: 600; }
 
-        .input-section {
-            display: flex; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 0.4s ease-in-out;
-        }
-
+        .input-section { display: flex; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 0.4s ease-in-out; }
+        
         .filter-box {
             width: 100%; max-width: 500px; background: rgba(255,255,255,0.06);
             border-radius: 24px; padding: 18px; border: 1px solid rgba(255,255,255,0.08);
@@ -55,46 +53,68 @@
         .form-col { flex: 1; }
         label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #cbd5e1; }
 
+        /* CUSTOM CLICK-ANYWHERE DATE PICKER */
+        .date-wrapper {
+            position: relative; display: flex; align-items: center; background: rgba(255, 255, 255, 0.06);
+            border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden; cursor: pointer; transition: 0.3s;
+        }
+        .date-wrapper:hover { border-color: #38bdf8; background: rgba(255, 255, 255, 0.1); }
+        .date-icon {
+            position: absolute; left: 14px; color: #38bdf8; display: flex; align-items: center; pointer-events: none;
+        }
+        .date-input {
+            width: 100%; padding: 12px 16px 12px 44px; border: none; background: transparent;
+            font-size: 14px; font-weight: 700; cursor: pointer; color: white; outline: none;
+        }
+        .date-input::-webkit-calendar-picker-indicator {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;
+        }
+
         .input-box {
             width: 100%; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 12px 16px; border-radius: 12px; color: white; font-size: 14px; outline: none; transition: 0.3s;
+            padding: 12px 16px; border-radius: 12px; color: white; font-size: 14px; outline: none; transition: 0.3s; cursor: pointer;
         }
         .input-box:focus { border-color: #38bdf8; background: rgba(255,255,255,0.1); }
         .input-box option { background: #0f172a; color: white; }
 
-        .btn-row { display: flex; justify-content: space-between; margin-top: 20px; }
-        .btn { border: none; border-radius: 12px; padding: 14px 30px; font-size: 15px; font-weight: 800; cursor: pointer; transition: 0.3s; }
-        .btn-cancel { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.2); width: 35%; }
-        .btn-save { background: linear-gradient(135deg, #e11d48, #be123c); color: white; box-shadow: 0 5px 15px rgba(225, 29, 72, 0.3); width: 60%; }
+        .btn-row { display: flex; justify-content: space-between; margin-top: 20px; gap: 10px;}
+        .btn { border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 800; cursor: pointer; transition: 0.3s; }
+        .btn-cancel { flex: 0 0 35%; background: rgba(255, 255, 255, 0.08); color: white; border: 1px solid rgba(255,255,255,0.2); }
+        .btn-cancel:hover { background: rgba(255, 255, 255, 0.15); }
+        .btn-save { flex: 1; background: linear-gradient(135deg, #e11d48, #be123c); color: white; box-shadow: 0 5px 15px rgba(225, 29, 72, 0.3); }
+        .btn-save:hover { background: linear-gradient(135deg, #be123c, #9f1239); }
 
         #loader { display: none; text-align: center; margin-top: 20px; color: #38bdf8; font-weight: bold; }
         
         #toast {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             background: linear-gradient(135deg, #111827, #1f2937); padding: 14px 20px;
-            border-radius: 16px; color: white; font-weight: 700; z-index: 9999; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            border-radius: 16px; color: white; font-weight: 700; z-index: 9999;
+            display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
 
         #resultsScreen { display: none; width: 100%; animation: fadeIn 0.4s; }
-
+        
         .masonry-grid { display: grid; grid-template-columns: 1fr; gap: 14px; align-items: start; }
         .masonry-col { display: flex; flex-direction: column; gap: 14px; }
-        
+
         .code-card {
             background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
-            border-radius: 22px; padding: 14px; border: 1px solid rgba(255,255,255,0.10); transition: 0.3s ease;
+            border-radius: 22px; padding: 14px; margin-bottom: 14px; border: 1px solid rgba(255,255,255,0.10); transition: 0.3s ease;
         }
         .code-card:hover { transform: translateY(-4px); }
 
         .all-card {
-            background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.35); margin-bottom: 20px;
         }
 
-        .card-header-toggle { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; padding: 2px 0; }
-        .header-left { display: flex; align-items: center; gap: 10px; }
+        .card-header-toggle { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; padding: 2px 0;}
+        .header-left { display: flex; align-items: center; gap: 12px; }
         .code-icon {
-            width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #e11d48, #be123c);
-            display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; flex-shrink: 0;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: linear-gradient(135deg, #e11d48, #be123c);
+            display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; flex-shrink: 0;
         }
         .code-title { font-size: 18px; font-weight: 800; }
         .code-subtitle { font-size: 12px; color: #94a3b8; margin-top: 2px; }
@@ -104,14 +124,14 @@
 
         .card-collapsible { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.1); }
 
-        .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-        .summary-box { background: rgba(255,255,255,0.08); border-radius: 14px; padding: 10px; text-align: center; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin-bottom: 12px; }
+        .summary-box { background: rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 8px; text-align: center; }
         .summary-number { font-size: 18px; font-weight: 900; color: #38bdf8; }
-        .summary-label { font-size: 10px; color: #cbd5e1; margin-top: 2px; font-weight: bold; }
+        .summary-label { font-size: 10px; color: #cbd5e1; margin-top: 4px; font-weight: bold; }
 
         .action-btn-row { display: flex; gap: 8px; }
         .download-btn, .share-btn {
-            flex: 1; border: none; padding: 11px; border-radius: 12px; font-size: 13px; font-weight: 800;
+            flex: 1; border: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: bold;
             cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; color: white;
         }
         .download-btn { background: linear-gradient(135deg, #16a34a, #22c55e); }
@@ -128,6 +148,7 @@
             .masonry-grid { grid-template-columns: 1fr 1fr; }
             .all-card { align-self: center; width: 100%; max-width: 500px; margin: 0 auto 20px auto; }
         }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -140,7 +161,6 @@
 <div class="container">
     <div class="header">
         <img src="gs.png" class="logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5MCIgaGVpZ2h0PSI5MCI+PGNpcmNsZSBjeD0iNDUiIGN5PSI0NSIgcj0iNDUiIGZpbGw9IiM0NzU1NjkiLz48L3N2Zz4='">
-        
         <div class="title">Spring Report Generator</div>
         <div class="creator-text">App Created By 👤 Gobind Sharma</div>
     </div>
@@ -149,12 +169,26 @@
         <div class="filter-box">
             <div class="form-row">
                 <div class="form-col">
-                    <label>From Date <span style="color:red">*</span></label>
-                    <input type="date" id="startDate" class="input-box" required>
+                    <label>Start Date <span style="color:red">*</span></label>
+                    <div class="date-wrapper" onclick="try{document.getElementById('startDate').showPicker()}catch(e){}">
+                        <div class="date-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <input type="date" id="startDate" class="date-input" required>
+                    </div>
                 </div>
                 <div class="form-col">
-                    <label>To Date <span style="color:red">*</span></label>
-                    <input type="date" id="endDate" class="input-box" required>
+                    <label>End Date <span style="color:red">*</span></label>
+                    <div class="date-wrapper" onclick="try{document.getElementById('endDate').showPicker()}catch(e){}">
+                        <div class="date-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <input type="date" id="endDate" class="date-input" required>
+                    </div>
                 </div>
             </div>
 
@@ -380,7 +414,7 @@
         });
 
         const allCard = document.createElement('div');
-        allCard.className = 'code-card all-card';
+        allCard.className = 'all-card code-card';
         allCard.innerHTML = `
             <div class="card-header-toggle" onclick="toggleCard('ALL')">
                 <div class="header-left">
@@ -398,8 +432,8 @@
                     <div class="summary-box"><div class="summary-number">${allC}</div><div class="summary-label">Group C</div></div>
                 </div>
                 <div class="action-btn-row">
-                    <button class="download-btn" onclick="downloadPDF(null, true)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download All</button>
-                    <button class="share-btn" onclick="sharePDF(null, true)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share All</button>
+                    <button class="download-btn" onclick="downloadPDF(null, true)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download All</button>
+                    <button class="share-btn" onclick="sharePDF(null, true)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share All</button>
                 </div>
             </div>`;
         container.appendChild(allCard);
@@ -441,8 +475,8 @@
                 <div class="card-collapsible" id="body-${safeId}">
                     ${summaryHtml}
                     <div class="action-btn-row">
-                        <button class="download-btn" onclick="downloadPDF('${code}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download</button>
-                        <button class="share-btn" onclick="sharePDF('${code}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share</button>
+                        <button class="download-btn" onclick="downloadPDF('${code}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download</button>
+                        <button class="share-btn" onclick="sharePDF('${code}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share</button>
                     </div>
                 </div>`;
             
@@ -462,17 +496,14 @@
         document.getElementById('formScreen').style.display = 'block';
     }
 
-    // High Performance Safe Gradient function for jsPDF
-    function drawGradient(doc, x, y, w, h, c1, c2) {
-        let steps = 40; 
-        let stepW = w / steps;
-        for (let i = 0; i < steps; i++) {
-            let ratio = i / steps;
-            let r = Math.round(c1[0] + (c2[0] - c1[0]) * ratio);
-            let g = Math.round(c1[1] + (c2[1] - c1[1]) * ratio);
-            let b = Math.round(c1[2] + (c2[2] - c1[2]) * ratio);
+    function drawGradient(doc, x, y, w, h, startColor, endColor) {
+        for (let i = 0; i <= w; i += 0.5) {
+            let ratio = i / w;
+            let r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * ratio);
+            let g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * ratio);
+            let b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * ratio);
             doc.setFillColor(r, g, b);
-            doc.rect(x + (i * stepW), y, stepW + 0.5, h, 'F');
+            doc.rect(x + i, y, 0.6, h, 'F');
         }
     }
 
@@ -486,12 +517,11 @@
         let countA = 0, countB = 0, countC = 0;
         let failSummaryMap = {};
 
-        // Calculate Metadata & Failure Summary
         dataToPrint.forEach(r => {
             const grp = (r[COL_GROUP] || '').toUpperCase();
             if (grp === 'FAIL') {
                 fail++;
-                let cause = r[COL_CAUSE] || 'Unknown';
+                let cause = r[COL_CAUSE] || 'Unknown'; // Ensure 'Cause of Failure' maps properly
                 let make = r[COL_MAKE] || '-';
                 let key = cause + '|' + make;
                 if(!failSummaryMap[key]) failSummaryMap[key] = { cause, make, count: 0 };
@@ -528,7 +558,7 @@
                 failIdx++;
             }
 
-            // Mapped 'Cause of Failure' to 'Remark' column per instructions
+            // REMARK mapped to COL_CAUSE per your instruction. Failure Report mapped to COL_REMARK if needed, but 'cause' tracks COL_CAUSE here.
             let innerRow = [
                 r[COL_MAKE] || '', r[COL_MFG] || '', r[COL_SL] || '', r[COL_FREE_HT] || '', 
                 r[COL_HT_LOAD] || '', r[COL_GROUP] || '', r[COL_CRACK] || '', r[COL_CAUSE] || '', 
@@ -542,13 +572,13 @@
                         { content: displayDate, rowSpan: dateCounts[displayDate], styles: { valign: 'middle', halign: 'center', fontStyle: 'bold' } }, 
                         ...innerRow
                     ],
-                    grpIdx: currentGroup
+                    group: currentGroup
                 });
                 previousDate = displayDate;
             } else {
                 bodyRows.push({
                     row: innerRow,
-                    grpIdx: currentGroup
+                    group: currentGroup
                 });
             }
         });
@@ -562,12 +592,13 @@
         const startDateStr = formatForHeader(document.getElementById('startDate').value);
         const endDateStr = formatForHeader(document.getElementById('endDate').value);
         const pw = doc.internal.pageSize.width;
+
         let startPage = doc.internal.getCurrentPageInfo().pageNumber;
 
-        // AutoTable handles page breaks gracefully
+        // AutoTable handles the table layout natively with flawless rowSpan merging
         doc.autoTable({
-            startY: 60, // Clear the 22px header + 26px card + 12px gap
-            margin: { top: 30, left: 5, right: 5, bottom: 15 }, // 30px top margin leaves 8px gap below the 22px header on continuation pages
+            startY: 55, // Leaves space for the rounded Details Card on Page 1
+            margin: { top: 26, left: 5, right: 5, bottom: 12 }, // Continued pages leave 26px for the slim header + 8px gap
             head: [
                 [ 
                     { content: 'Daily Working Report', colSpan: 10 },
@@ -578,12 +609,12 @@
             body: bodyRows.map(r => r.row),
             theme: 'grid',
             styles: { fontSize: 7.5, cellPadding: 2, lineColor: [200, 200, 200], lineWidth: 0.1, valign: 'middle', halign: 'center', textColor: 0 },
-            headStyles: { lineWidth: 0.1, lineColor: [255, 255, 255], textColor: 255, halign: 'center' },
+            headStyles: { lineWidth: 0, textColor: 255, halign: 'center' },
             didParseCell: function(data) {
                 if (data.section === 'body') {
-                    const rowInfo = bodyRows[data.row.index];
+                    const rowData = bodyRows[data.row.index];
                     if (data.column.index < 10) {
-                        data.cell.styles.fillColor = rowInfo.grpIdx % 2 === 0 ? [255, 255, 255] : [240, 248, 255]; 
+                        data.cell.styles.fillColor = rowData.group % 2 === 0 ? [255, 255, 255] : [235, 243, 255]; 
                     } else {
                         data.cell.styles.fillColor = data.row.index % 2 === 0 ? [255, 255, 255] : [255, 240, 240]; 
                     }
@@ -602,58 +633,55 @@
 
         let endPage = doc.internal.getCurrentPageInfo().pageNumber;
 
-        // Render Page Layouts
+        // Render Page Headers and Footers
         for (let p = startPage; p <= endPage; p++) {
             doc.setPage(p);
             
             // DRAW TOP HEADER (ON ALL PAGES)
-            drawGradient(doc, 0, 0, pw, 22, [15, 23, 42], [30, 58, 138]);
+            drawGradient(doc, 0, 0, pw, 18, [15, 23, 42], [30, 58, 138]);
             
-            try {
-                const img = document.getElementById('pdfLogo');
-                if (img && !img.dataset.failed) doc.addImage(img, 'PNG', 5, 2, 18, 18);
-            } catch(e) {}
-            
-            doc.setTextColor(255, 255, 255); 
+            doc.setTextColor(255); 
             doc.setFontSize(16); doc.setFont('helvetica', 'bold');
             doc.text("Spring Report", pw / 2, 8, { align: 'center' });
             
             doc.setFontSize(9); doc.setFont('helvetica', 'bold');
             doc.text("SSE/BSS/NBQS", pw / 2, 13, { align: 'center' });
             
-            doc.setFontSize(8); doc.setFont('helvetica', 'normal');
-            doc.text("App Created By Gobind Sharma", pw / 2, 18, { align: 'center' });
+            // Fixed GS Icon (optional, per your prompt)
+            try {
+                const img = document.getElementById('pdfLogo');
+                if (img && !img.dataset.failed) doc.addImage(img, 'PNG', 5, 1, 16, 16);
+            } catch(e) {}
 
             if (p === startPage) {
                 // PAGE 1 Top Right Code
                 doc.setFontSize(10); doc.setFont('helvetica', 'bold');
                 doc.text(`Code: ${code}`, pw - 5, 12, { align: 'right' });
 
-                // DETAILS CARD (Page 1 Only) perfectly matched with table width (pw - 10)
-                let cardY = 26; 
-                let cardH = 22;
-                drawGradient(doc, 5, cardY, pw - 10, cardH, [15, 23, 42], [30, 58, 138]);
-                doc.setDrawColor(255, 255, 255); doc.setLineWidth(0.3);
-                doc.roundedRect(5, cardY, pw - 10, cardH, 2, 2, 'S');
+                // DETAILS CARD (Page 1 Only) perfectly matched with table width (pw - 10) and rounded
+                let cardY = 24; 
+                let cardH = 24;
+                doc.setFillColor(30, 58, 138); // Match the dark blue gradient color
+                doc.roundedRect(5, cardY, pw - 10, cardH, 4, 4, 'F');
                 
-                let col1X = 15, col2X = pw/2 - 40, col3X = pw - 55;
+                let col1X = 15, col2X = pw/2 - 40, col3X = pw - 60;
                 
-                doc.setTextColor(255, 255, 255); doc.setFontSize(9);
+                doc.setTextColor(255); doc.setFontSize(9);
                 
-                doc.setFont('helvetica', 'bold'); doc.text("From Date:", col1X, cardY + 7); doc.setFont('helvetica', 'normal'); doc.text(startDateStr, col1X + 22, cardY + 7);
-                doc.setFont('helvetica', 'bold'); doc.text("To Date:", col1X, cardY + 15); doc.setFont('helvetica', 'normal'); doc.text(endDateStr, col1X + 22, cardY + 15);
+                doc.setFont('helvetica', 'bold'); doc.text("From Date:", col1X, cardY + 8); doc.setFont('helvetica', 'normal'); doc.text(startDateStr, col1X + 22, cardY + 8);
+                doc.setFont('helvetica', 'bold'); doc.text("To Date:", col1X, cardY + 16); doc.setFont('helvetica', 'normal'); doc.text(endDateStr, col1X + 22, cardY + 16);
                 
-                doc.setFont('helvetica', 'bold'); doc.text("Type of Bogies:", col2X, cardY + 7); doc.setFont('helvetica', 'normal'); doc.text(details.bogie, col2X + 28, cardY + 7);
-                doc.setFont('helvetica', 'bold'); doc.text("Type of Spring:", col2X, cardY + 15); doc.setFont('helvetica', 'normal'); doc.text(details.spring, col2X + 28, cardY + 15);
+                doc.setFont('helvetica', 'bold'); doc.text("Type of Bogies:", col2X, cardY + 8); doc.setFont('helvetica', 'normal'); doc.text(details.bogie, col2X + 28, cardY + 8);
+                doc.setFont('helvetica', 'bold'); doc.text("Type of Spring:", col2X, cardY + 16); doc.setFont('helvetica', 'normal'); doc.text(details.spring, col2X + 28, cardY + 16);
                 
-                doc.setFont('helvetica', 'bold'); doc.text("Load:", col3X, cardY + 7); doc.setFont('helvetica', 'normal'); doc.text(details.load, col3X + 15, cardY + 7);
-                doc.setFont('helvetica', 'bold'); doc.text("Total:", col3X, cardY + 15); doc.setFont('helvetica', 'normal'); doc.text(total.toString(), col3X + 15, cardY + 15);
+                doc.setFont('helvetica', 'bold'); doc.text("Load:", col3X, cardY + 8); doc.setFont('helvetica', 'normal'); doc.text(details.load, col3X + 15, cardY + 8);
+                doc.setFont('helvetica', 'bold'); doc.text("Total:", col3X, cardY + 16); doc.setFont('helvetica', 'normal'); doc.text(total.toString(), col3X + 15, cardY + 16);
 
-                doc.setFont('helvetica', 'bold'); doc.text("Pass:", pw - 30, cardY + 7); doc.setFont('helvetica', 'normal'); doc.text(pass.toString(), pw - 15, cardY + 7);
-                doc.setFont('helvetica', 'bold'); doc.text("Fail:", pw - 30, cardY + 15); doc.setFont('helvetica', 'normal'); doc.text(fail.toString(), pw - 15, cardY + 15);
+                doc.setFont('helvetica', 'bold'); doc.text("Pass:", pw - 30, cardY + 8); doc.setFont('helvetica', 'normal'); doc.text(pass.toString(), pw - 15, cardY + 8);
+                doc.setFont('helvetica', 'bold'); doc.text("Fail:", pw - 30, cardY + 16); doc.setFont('helvetica', 'normal'); doc.text(fail.toString(), pw - 15, cardY + 16);
 
                 // Badges A, B, C
-                let badgeY = cardY + 8;
+                let badgeY = cardY + 9;
                 let badgeX = pw/2 + 30;
                 doc.setFillColor(253, 224, 71); doc.roundedRect(badgeX, badgeY, 15, 6, 2, 2, 'F');
                 doc.setTextColor(0); doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.text(`A - ${countA}`, badgeX + 7.5, badgeY + 4.2, {align: 'center'});
@@ -673,7 +701,7 @@
             // COMMON FOOTER
             const ph = doc.internal.pageSize.height;
             drawGradient(doc, 0, ph - 10, pw, 10, [15, 23, 42], [30, 58, 138]);
-            doc.setTextColor(255, 255, 255); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+            doc.setTextColor(255); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
             doc.text("App Created By Gobind Sharma", 10, ph - 4);
             doc.text(`Page ${p}`, pw - 15, ph - 4);
         }
