@@ -76,7 +76,7 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 16px;
-            align-items: start; /* FIXED: Prevents cards from stretching vertically when sibling opens */
+            align-items: start; 
         }
 
         @media (min-width: 600px) {
@@ -463,7 +463,7 @@
         document.getElementById('formScreen').style.display = 'block';
     }
 
-    // Function restricted only to standard rectangle gradients (Top & Bottom headers)
+    // Standard simple gradient drawing function
     function drawGradient(doc, x, y, w, h, startColor, endColor) {
         for (let i = 0; i <= w; i += 0.5) {
             let ratio = i / w;
@@ -548,7 +548,7 @@
 
         doc.autoTable({
             startY: 50, 
-            margin: { top: 15, left: 5, right: 5, bottom: 15 }, // Adjusted top margin for continued pages
+            margin: { top: 15, left: 5, right: 5, bottom: 15 },
             head: [
                 [ 
                     { content: 'Daily Working Report', colSpan: 10 },
@@ -562,7 +562,6 @@
             headStyles: { lineWidth: 0, textColor: 255, halign: 'center' },
             didParseCell: function(data) {
                 if (data.section === 'body') {
-                    // ALL dates are now visible and colors apply uniformly per row
                     if (data.column.index < 10) {
                         data.cell.styles.fillColor = data.row.index % 2 === 0 ? [255, 255, 255] : [240, 248, 255]; 
                     } else {
@@ -591,7 +590,6 @@
             doc.setTextColor(255, 255, 255); 
             
             if (p === startPage) {
-                // PAGE 1 MAIN HEADER
                 drawGradient(doc, 0, 0, pw, 22, [15, 23, 42], [30, 58, 138]);
                 
                 try {
@@ -609,11 +607,18 @@
                 doc.setFontSize(10); doc.setFont('helvetica', 'bold');
                 doc.text(`Code: ${code}`, pw - 40, 13, { align: 'center' });
 
-                // PAGE 1 DETAILS CARD - Fixes broken pixel edges by utilizing perfect native rounded rect vectors + Solid distinct color (Emerald Teal)
+                // DETAILS CARD - Using Clipping Path for Perfect Vector Rounded Gradient
                 let cardY = 25; 
                 let cardH = 22;
-                doc.setFillColor(4, 120, 87); // Emerald color distinct from Blue top header
-                doc.roundedRect(5, cardY, pw - 10, cardH, 3, 3, 'F');
+                
+                doc.saveGraphicsState(); // Save state before clipping
+                doc.roundedRect(5, cardY, pw - 10, cardH, 3, 3, null); // Define perfect rounded vector path
+                doc.clip(); // Mask everything inside this path
+                
+                // Draw distinct Emerald gradient, which is now cleanly clipped by the vector path
+                drawGradient(doc, 5, cardY, pw - 10, cardH, [2, 44, 34], [16, 185, 129]); 
+                
+                doc.restoreGraphicsState(); // Release clipping mask
                 
                 let col1X = 15, col2X = pw/2 - 40, col3X = pw - 50;
                 doc.setTextColor(255, 255, 255); doc.setFontSize(9);
@@ -641,13 +646,11 @@
                 doc.setFillColor(34, 197, 94); doc.roundedRect(badgeX + 40, badgeY, 15, 6, 2, 2, 'F');
                 doc.setTextColor(0); doc.text(`C - ${countC}`, badgeX + 47.5, badgeY + 4.2, {align: 'center'});
             } else {
-                // CONTINUED PAGE HEADER - Reduced size and removed non-essential text
                 drawGradient(doc, 0, 0, pw, 12, [15, 23, 42], [30, 58, 138]);
                 doc.setFontSize(11); doc.setFont('helvetica', 'bold');
                 doc.text(`Code: ${code} (Continued)`, pw / 2, 8, { align: 'center' });
             }
 
-            // DRAW FOOTER (ON ALL PAGES)
             const ph = doc.internal.pageSize.height;
             drawGradient(doc, 0, ph - 10, pw, 10, [15, 23, 42], [30, 58, 138]);
             doc.setTextColor(255, 255, 255); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
