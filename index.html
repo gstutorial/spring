@@ -23,7 +23,7 @@
 
         .container {
             width: 100%;
-            max-width: 700px;
+            max-width: 1000px;
             margin: auto;
             background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
             border-radius: 30px;
@@ -33,9 +33,22 @@
             box-shadow: 0 15px 50px rgba(0,0,0,0.45);
         }
 
+        .logo {
+            width: 100px; height: 100px; object-fit: contain; display: block; margin: 0 auto 15px auto;
+        }
+
         .header { text-align: center; margin-bottom: 25px; }
-        .title { font-size: 26px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .title { font-size: 28px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .creator-text { margin-top: 8px; font-size: 13px; color: #94a3b8; font-weight: 600; }
+
+        .input-section {
+            display: flex; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .filter-box {
+            width: 100%; max-width: 500px; background: rgba(255,255,255,0.06);
+            border-radius: 24px; padding: 18px; border: 1px solid rgba(255,255,255,0.08);
+        }
 
         .form-group { margin-bottom: 16px; }
         .form-row { display: flex; gap: 15px; margin-bottom: 16px; }
@@ -49,68 +62,72 @@
         .input-box:focus { border-color: #38bdf8; background: rgba(255,255,255,0.1); }
         .input-box option { background: #0f172a; color: white; }
 
-        .btn-row { display: flex; justify-content: space-between; margin-top: 30px; }
+        .btn-row { display: flex; justify-content: space-between; margin-top: 20px; }
         .btn { border: none; border-radius: 12px; padding: 14px 30px; font-size: 15px; font-weight: 800; cursor: pointer; transition: 0.3s; }
-        .btn-cancel { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.2); }
-        .btn-save { background: #e11d48; color: white; box-shadow: 0 5px 15px rgba(225, 29, 72, 0.3); }
-        .btn-save:hover { background: #be123c; }
+        .btn-cancel { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.2); width: 35%; }
+        .btn-save { background: linear-gradient(135deg, #e11d48, #be123c); color: white; box-shadow: 0 5px 15px rgba(225, 29, 72, 0.3); width: 60%; }
 
         #loader { display: none; text-align: center; margin-top: 20px; color: #38bdf8; font-weight: bold; }
         
         #toast {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             background: linear-gradient(135deg, #111827, #1f2937); padding: 14px 20px;
-            border-radius: 16px; color: white; font-weight: 700; z-index: 9999;
-            display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            border-radius: 16px; color: white; font-weight: 700; z-index: 9999; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
 
-        #resultsScreen { display: none; animation: fadeIn 0.4s; }
+        #resultsScreen { display: none; width: 100%; animation: fadeIn 0.4s; }
+
+        .masonry-grid { display: grid; grid-template-columns: 1fr; gap: 14px; align-items: start; }
+        .masonry-col { display: flex; flex-direction: column; gap: 14px; }
         
         .code-card {
             background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
-            border-radius: 16px; padding: 16px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.10);
-            transition: 0.3s ease;
+            border-radius: 22px; padding: 14px; border: 1px solid rgba(255,255,255,0.10); transition: 0.3s ease;
         }
+        .code-card:hover { transform: translateY(-4px); }
 
         .all-card {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+            background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.35);
         }
 
-        .card-header-toggle { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
-        .header-left { display: flex; align-items: center; gap: 12px; }
+        .card-header-toggle { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; padding: 2px 0; }
+        .header-left { display: flex; align-items: center; gap: 10px; }
         .code-icon {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: linear-gradient(135deg, #e11d48, #be123c);
-            display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900;
+            width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #e11d48, #be123c);
+            display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; flex-shrink: 0;
         }
         .code-title { font-size: 18px; font-weight: 800; }
-        .code-subtitle { font-size: 12px; color: #94a3b8; }
+        .code-subtitle { font-size: 12px; color: #94a3b8; margin-top: 2px; }
         
-        .toggle-arrow { transition: transform 0.3s ease; }
+        .toggle-arrow { color: #cbd5e1; transition: transform 0.3s ease; }
         .rotate-arrow { transform: rotate(180deg); }
 
-        .card-collapsible { display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .card-collapsible { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.1); }
 
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 10px; margin-bottom: 16px; }
-        .summary-box { background: rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 8px; text-align: center; }
-        .summary-number { font-size: 20px; font-weight: 900; color: #38bdf8; }
-        .summary-label { font-size: 11px; color: #cbd5e1; margin-top: 4px; font-weight: bold; }
+        .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .summary-box { background: rgba(255,255,255,0.08); border-radius: 14px; padding: 10px; text-align: center; }
+        .summary-number { font-size: 18px; font-weight: 900; color: #38bdf8; }
+        .summary-label { font-size: 10px; color: #cbd5e1; margin-top: 2px; font-weight: bold; }
 
-        .action-btn-row { display: flex; gap: 10px; }
+        .action-btn-row { display: flex; gap: 8px; }
         .download-btn, .share-btn {
-            flex: 1; border: none; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: bold;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; color: white;
+            flex: 1; border: none; padding: 11px; border-radius: 12px; font-size: 13px; font-weight: 800;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; color: white;
         }
         .download-btn { background: linear-gradient(135deg, #16a34a, #22c55e); }
         .share-btn { background: linear-gradient(135deg, #2563eb, #38bdf8); }
 
         .back-btn {
-            background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);
-            padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px;
+            width: 100%; max-width: 450px; margin: 20px auto 0; border: none; border-radius: 18px; padding: 15px;
+            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white; font-size: 16px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s;
         }
+        .back-btn:hover { background: rgba(255, 255, 255, 0.15); }
 
+        @media(min-width: 992px) {
+            .masonry-grid { grid-template-columns: 1fr 1fr; }
+            .all-card { align-self: center; width: 100%; max-width: 500px; margin: 0 auto 20px auto; }
+        }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -122,35 +139,36 @@
 
 <div class="container">
     <div class="header">
-        <div class="title">
-            <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-            Spring Report Generator
-        </div>
-        <div class="creator-text">App Created By Gobind Sharma</div>
+        <img src="gs.png" class="logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5MCIgaGVpZ2h0PSI5MCI+PGNpcmNsZSBjeD0iNDUiIGN5PSI0NSIgcj0iNDUiIGZpbGw9IiM0NzU1NjkiLz48L3N2Zz4='">
+        
+        <div class="title">Spring Report Generator</div>
+        <div class="creator-text">App Created By 👤 Gobind Sharma</div>
     </div>
 
-    <div id="formScreen">
-        <div class="form-row">
-            <div class="form-col">
-                <label>Start Date <span style="color:red">*</span></label>
-                <input type="date" id="startDate" class="input-box" required>
+    <div id="formScreen" class="input-section">
+        <div class="filter-box">
+            <div class="form-row">
+                <div class="form-col">
+                    <label>From Date <span style="color:red">*</span></label>
+                    <input type="date" id="startDate" class="input-box" required>
+                </div>
+                <div class="form-col">
+                    <label>To Date <span style="color:red">*</span></label>
+                    <input type="date" id="endDate" class="input-box" required>
+                </div>
             </div>
-            <div class="form-col">
-                <label>End Date <span style="color:red">*</span></label>
-                <input type="date" id="endDate" class="input-box" required>
+
+            <div class="form-group"><label>Code</label><select id="selCode" class="input-box"><option value="">-- All --</option></select></div>
+            <div class="form-group"><label>Group</label><select id="selGroup" class="input-box"><option value="">-- All --</option></select></div>
+            <div class="form-group"><label>Make</label><select id="selMake" class="input-box"><option value="">-- All --</option></select></div>
+            <div class="form-group"><label>User Name (Tested By)</label><select id="selUser" class="input-box"><option value="">-- All --</option></select></div>
+
+            <div id="loader">Fetching and processing data...</div>
+
+            <div class="btn-row">
+                <button class="btn btn-cancel" onclick="resetForm()">Reset</button>
+                <button class="btn btn-save" onclick="generateReport()">📄 Generate</button>
             </div>
-        </div>
-
-        <div class="form-group"><label>Code</label><select id="selCode" class="input-box"><option value="">-- All --</option></select></div>
-        <div class="form-group"><label>Group</label><select id="selGroup" class="input-box"><option value="">-- All --</option></select></div>
-        <div class="form-group"><label>Make</label><select id="selMake" class="input-box"><option value="">-- All --</option></select></div>
-        <div class="form-group"><label>User Name (Tested By)</label><select id="selUser" class="input-box"><option value="">-- All --</option></select></div>
-
-        <div id="loader">Fetching and processing data...</div>
-
-        <div class="btn-row">
-            <button class="btn btn-cancel" onclick="resetForm()">Reset</button>
-            <button class="btn btn-save" onclick="generateReport()">Generate Report</button>
         </div>
     </div>
 
@@ -163,7 +181,9 @@
         <div id="codeCardsContainer"></div>
 
         <button class="back-btn" onclick="goBack()">
-            <svg width="18" height="18" style="vertical-align: middle; margin-right: 5px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
             Back to Search
         </button>
     </div>
@@ -173,7 +193,6 @@
     const DATA_URL = 'https://docs.google.com/spreadsheets/d/1WYK6dThqgY6vU-HpKggFXN0Roz3aq3wX99BTGDEkgcQ/export?format=csv&gid=0';
     const CODE_URL = 'https://docs.google.com/spreadsheets/d/1WYK6dThqgY6vU-HpKggFXN0Roz3aq3wX99BTGDEkgcQ/export?format=csv&gid=2132794261';
     
-    // Exact column mappings
     const COL_DATE = 1, COL_MAKE = 2, COL_MFG = 3, COL_SL = 4, COL_FREE_HT = 5, COL_HT_LOAD = 7;
     const COL_GROUP = 8, COL_CRACK = 9, COL_CAUSE = 10, COL_REMARK = 11, COL_CODE = 12, COL_USER = 18; 
     
@@ -245,9 +264,7 @@
             for (let i = 1; i < codeLines.length; i++) {
                 const row = parseCSVLine(codeLines[i]);
                 if (row[idxC]) {
-                    codeDetailsMap[row[idxC]] = { 
-                        bogie: row[idxB] || 'N/A', spring: row[idxS] || 'N/A', load: row[idxL] || 'N/A' 
-                    };
+                    codeDetailsMap[row[idxC]] = { bogie: row[idxB] || 'N/A', spring: row[idxS] || 'N/A', load: row[idxL] || 'N/A' };
                 }
             }
 
@@ -350,25 +367,51 @@
         const container = document.getElementById('codeCardsContainer');
         container.innerHTML = '';
 
+        // Calculate global stats for "All Report"
+        let allA = 0, allB = 0, allC = 0, allTotal = 0;
+        Object.keys(groupedFilteredData).forEach(c => {
+            groupedFilteredData[c].forEach(r => {
+                allTotal++;
+                const grp = (r[COL_GROUP] || '').toUpperCase();
+                if (grp === 'A') allA++;
+                if (grp === 'B') allB++;
+                if (grp === 'C') allC++;
+            });
+        });
+
         const allCard = document.createElement('div');
         allCard.className = 'code-card all-card';
         allCard.innerHTML = `
             <div class="card-header-toggle" onclick="toggleCard('ALL')">
                 <div class="header-left">
                     <div class="code-icon" style="background: linear-gradient(135deg, #10b981, #047857);">📚</div>
-                    <div><div class="code-title">ALL CODES COMBINED</div><div class="code-subtitle">Combine all sections in one PDF</div></div>
+                    <div><div class="code-title">All Report</div><div class="code-subtitle">${allTotal} Total Entries Combined</div></div>
                 </div>
                 <div class="toggle-arrow" id="arrow-ALL">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </div>
             </div>
             <div class="card-collapsible" id="body-ALL">
+                <div class="summary-grid">
+                    <div class="summary-box"><div class="summary-number">${allA}</div><div class="summary-label">Group A</div></div>
+                    <div class="summary-box"><div class="summary-number">${allB}</div><div class="summary-label">Group B</div></div>
+                    <div class="summary-box"><div class="summary-number">${allC}</div><div class="summary-label">Group C</div></div>
+                </div>
                 <div class="action-btn-row">
                     <button class="download-btn" onclick="downloadPDF(null, true)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download All</button>
                     <button class="share-btn" onclick="sharePDF(null, true)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share All</button>
                 </div>
             </div>`;
         container.appendChild(allCard);
+
+        // Masonry 2-Column Grid Setup
+        const masonryGrid = document.createElement('div');
+        masonryGrid.className = 'masonry-grid';
+        const colLeft = document.createElement('div'); colLeft.className = 'masonry-col';
+        const colRight = document.createElement('div'); colRight.className = 'masonry-col';
+        masonryGrid.appendChild(colLeft);
+        masonryGrid.appendChild(colRight);
+        container.appendChild(masonryGrid);
 
         Object.keys(groupedFilteredData).forEach((code, index) => {
             const dataRows = groupedFilteredData[code];
@@ -388,7 +431,7 @@
             card.innerHTML = `
                 <div class="card-header-toggle" onclick="toggleCard('${safeId}')">
                     <div class="header-left">
-                        <div class="code-icon">${code.substring(0,2)}</div>
+                        <div class="code-icon">${code.substring(0,3)}</div>
                         <div><div class="code-title">Code: ${code}</div><div class="code-subtitle">${dataRows.length} Entries</div></div>
                     </div>
                     <div class="toggle-arrow" id="arrow-${safeId}">
@@ -402,7 +445,9 @@
                         <button class="share-btn" onclick="sharePDF('${code}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share</button>
                     </div>
                 </div>`;
-            container.appendChild(card);
+            
+            if (index % 2 === 0) colLeft.appendChild(card);
+            else colRight.appendChild(card);
         });
     }
 
@@ -417,14 +462,17 @@
         document.getElementById('formScreen').style.display = 'block';
     }
 
-    function drawGradient(doc, x, y, w, h, startColor, endColor) {
-        for (let i = 0; i <= w; i += 0.5) {
-            let ratio = i / w;
-            let r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * ratio);
-            let g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * ratio);
-            let b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * ratio);
+    // High Performance Safe Gradient function for jsPDF
+    function drawGradient(doc, x, y, w, h, c1, c2) {
+        let steps = 40; 
+        let stepW = w / steps;
+        for (let i = 0; i < steps; i++) {
+            let ratio = i / steps;
+            let r = Math.round(c1[0] + (c2[0] - c1[0]) * ratio);
+            let g = Math.round(c1[1] + (c2[1] - c1[1]) * ratio);
+            let b = Math.round(c1[2] + (c2[2] - c1[2]) * ratio);
             doc.setFillColor(r, g, b);
-            doc.rect(x + i, y, 0.6, h, 'F');
+            doc.rect(x + (i * stepW), y, stepW + 0.5, h, 'F');
         }
     }
 
@@ -438,6 +486,7 @@
         let countA = 0, countB = 0, countC = 0;
         let failSummaryMap = {};
 
+        // Calculate Metadata & Failure Summary
         dataToPrint.forEach(r => {
             const grp = (r[COL_GROUP] || '').toUpperCase();
             if (grp === 'FAIL') {
@@ -456,48 +505,53 @@
 
         const failSummaryArr = Object.values(failSummaryMap);
 
+        const dateCounts = {};
+        dataToPrint.forEach(r => {
+            const d = r.displayDate;
+            dateCounts[d] = (dateCounts[d] || 0) + 1;
+        });
+
         const bodyRows = [];
-        let i = 0;
         let currentGroup = -1;
+        let previousDate = '';
         let failIdx = 0;
 
-        // Custom Bounding Box Dictionary for Date Merging Engine
-        let pageDateBlocks = {};
-
-        while (i < dataToPrint.length) {
-            let startRow = dataToPrint[i];
-            let displayDate = startRow.displayDate;
-            let span = 1;
-            while (i + span < dataToPrint.length && dataToPrint[i + span].displayDate === displayDate) span++;
+        // Native rowSpan Engine precisely copied from SMS Work Report
+        dataToPrint.forEach((r, idx) => {
+            let displayDate = r.displayDate;
             
-            currentGroup++;
-            
-            for (let j = 0; j < span; j++) {
-                let r = dataToPrint[i + j];
-                
-                let cause = '', fMake = '', fTotal = '';
-                if (failIdx < failSummaryArr.length) {
-                    cause = failSummaryArr[failIdx].cause;
-                    fMake = failSummaryArr[failIdx].make;
-                    fTotal = failSummaryArr[failIdx].count.toString();
-                    failIdx++;
-                }
+            let cause = '', fMake = '', fTotal = '';
+            if (failIdx < failSummaryArr.length) {
+                cause = failSummaryArr[failIdx].cause;
+                fMake = failSummaryArr[failIdx].make;
+                fTotal = failSummaryArr[failIdx].count.toString();
+                failIdx++;
+            }
 
-                // Make sure COL_CAUSE maps to Remark column in the layout
-                let innerRow = [
-                    displayDate, r[COL_MAKE] || '', r[COL_MFG] || '', r[COL_SL] || '', r[COL_FREE_HT] || '', 
-                    r[COL_HT_LOAD] || '', r[COL_GROUP] || '', r[COL_CRACK] || '', r[COL_CAUSE] || '', 
-                    r[COL_USER] || '', cause, fMake, fTotal
-                ];
+            // Mapped 'Cause of Failure' to 'Remark' column per instructions
+            let innerRow = [
+                r[COL_MAKE] || '', r[COL_MFG] || '', r[COL_SL] || '', r[COL_FREE_HT] || '', 
+                r[COL_HT_LOAD] || '', r[COL_GROUP] || '', r[COL_CRACK] || '', r[COL_CAUSE] || '', 
+                r[COL_USER] || '', cause, fMake, fTotal
+            ];
 
+            if (displayDate !== previousDate) {
+                currentGroup++;
                 bodyRows.push({
-                    rawDate: displayDate,
+                    row: [
+                        { content: displayDate, rowSpan: dateCounts[displayDate], styles: { valign: 'middle', halign: 'center', fontStyle: 'bold' } }, 
+                        ...innerRow
+                    ],
+                    grpIdx: currentGroup
+                });
+                previousDate = displayDate;
+            } else {
+                bodyRows.push({
                     row: innerRow,
                     grpIdx: currentGroup
                 });
             }
-            i += span;
-        }
+        });
 
         const formatForHeader = (dateStr) => {
             const d = new Date(dateStr);
@@ -508,12 +562,12 @@
         const startDateStr = formatForHeader(document.getElementById('startDate').value);
         const endDateStr = formatForHeader(document.getElementById('endDate').value);
         const pw = doc.internal.pageSize.width;
-
         let startPage = doc.internal.getCurrentPageInfo().pageNumber;
 
+        // AutoTable handles page breaks gracefully
         doc.autoTable({
-            startY: 55, // Snug right below the card
-            margin: { top: 22, left: 5, right: 5, bottom: 15 },
+            startY: 60, // Clear the 22px header + 26px card + 12px gap
+            margin: { top: 30, left: 5, right: 5, bottom: 15 }, // 30px top margin leaves 8px gap below the 22px header on continuation pages
             head: [
                 [ 
                     { content: 'Daily Working Report', colSpan: 10 },
@@ -523,62 +577,24 @@
             ],
             body: bodyRows.map(r => r.row),
             theme: 'grid',
-            styles: { fontSize: 7.5, cellPadding: 2, lineColor: [200, 200, 200], lineWidth: 0.1, valign: 'middle', textColor: 0, halign: 'center' },
-            headStyles: { lineWidth: 0, textColor: 255, halign: 'center' },
+            styles: { fontSize: 7.5, cellPadding: 2, lineColor: [200, 200, 200], lineWidth: 0.1, valign: 'middle', halign: 'center', textColor: 0 },
+            headStyles: { lineWidth: 0.1, lineColor: [255, 255, 255], textColor: 255, halign: 'center' },
             didParseCell: function(data) {
                 if (data.section === 'body') {
                     const rowInfo = bodyRows[data.row.index];
-                    
-                    // Date Column (Custom Visual Engine)
-                    if (data.column.index === 0) {
-                        data.cell.text = ''; // Hide text
-                        let isFirstOnPage = data.row.index === 0 || (data.table.body[data.row.index - 1].pageNumber !== data.row.pageNumber);
-                        let isLastOnPage = data.row.index === bodyRows.length - 1 || (data.table.body[data.row.index + 1].pageNumber !== data.row.pageNumber);
-                        let isFirstInGroup = data.row.index === 0 || bodyRows[data.row.index - 1].rawDate !== rowInfo.rawDate;
-                        let isLastInGroup = data.row.index === bodyRows.length - 1 || bodyRows[data.row.index + 1].rawDate !== rowInfo.rawDate;
-
-                        data.cell.styles.lineWidth = {
-                            top: (isFirstInGroup || isFirstOnPage) ? 0.1 : 0,
-                            bottom: (isLastInGroup || isLastOnPage) ? 0.1 : 0,
-                            left: 0.1,
-                            right: 0.1
-                        };
-                        data.cell.styles.fillColor = rowInfo.grpIdx % 2 === 0 ? [255, 255, 255] : [240, 248, 255];
-                    } 
-                    // Main Columns Color
-                    else if (data.column.index < 10) {
+                    if (data.column.index < 10) {
                         data.cell.styles.fillColor = rowInfo.grpIdx % 2 === 0 ? [255, 255, 255] : [240, 248, 255]; 
-                    } 
-                    // Failure Report Color
-                    else {
+                    } else {
                         data.cell.styles.fillColor = data.row.index % 2 === 0 ? [255, 255, 255] : [255, 240, 240]; 
                     }
                 }
             },
             willDrawCell: function(data) {
-                // Header Gradients
                 if (data.section === 'head') {
-                    if (data.row.index === 0) {
-                        if (data.column.index === 0) drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [15, 23, 42], [30, 58, 138]);
-                        if (data.column.index === 10) drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [159, 18, 57], [220, 38, 38]);
-                    } else if (data.row.index === 1) {
-                        if (data.column.index < 10) drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [15, 23, 42], [30, 58, 138]);
-                        else drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [159, 18, 57], [220, 38, 38]);
-                    }
-                }
-            },
-            didDrawCell: function(data) {
-                if (data.section === 'body' && data.column.index === 0) {
-                    let pageNum = data.row.pageNumber;
-                    if (!pageDateBlocks[pageNum]) pageDateBlocks[pageNum] = {};
-                    
-                    let rowInfo = bodyRows[data.row.index];
-                    let rawD = rowInfo.rawDate;
-
-                    if (!pageDateBlocks[pageNum][rawD]) {
-                        pageDateBlocks[pageNum][rawD] = { minY: data.cell.y, maxY: data.cell.y + data.cell.height, x: data.cell.x, width: data.cell.width };
+                    if (data.column.index < 10) {
+                        drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [15, 23, 42], [30, 58, 138]);
                     } else {
-                        pageDateBlocks[pageNum][rawD].maxY = data.cell.y + data.cell.height;
+                        drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [159, 18, 57], [220, 38, 38]);
                     }
                 }
             }
@@ -586,54 +602,43 @@
 
         let endPage = doc.internal.getCurrentPageInfo().pageNumber;
 
-        // Overlay Headers, Footers, and Centered Merged Dates
+        // Render Page Layouts
         for (let p = startPage; p <= endPage; p++) {
             doc.setPage(p);
             
-            // Render Perfect Centered Dates Per Page
-            if (pageDateBlocks[p]) {
-                doc.setTextColor(0);
-                doc.setFontSize(7.5);
-                doc.setFont('helvetica', 'bold');
-                Object.keys(pageDateBlocks[p]).forEach(dateStr => {
-                    let b = pageDateBlocks[p][dateStr];
-                    let centerY = b.minY + ((b.maxY - b.minY) / 2);
-                    doc.text(dateStr, b.x + (b.width / 2), centerY, { align: 'center', baseline: 'middle' });
-                });
-            }
-
-            // HEADER (All Pages get the Gradient Header)
-            drawGradient(doc, 0, 0, pw, 24, [15, 23, 42], [30, 58, 138]);
+            // DRAW TOP HEADER (ON ALL PAGES)
+            drawGradient(doc, 0, 0, pw, 22, [15, 23, 42], [30, 58, 138]);
             
             try {
                 const img = document.getElementById('pdfLogo');
-                if (img && !img.dataset.failed) doc.addImage(img, 'PNG', 5, 3, 18, 18);
+                if (img && !img.dataset.failed) doc.addImage(img, 'PNG', 5, 2, 18, 18);
             } catch(e) {}
             
-            doc.setTextColor(255); 
-            doc.setFontSize(18); doc.setFont('helvetica', 'bold');
-            doc.text("Spring Report", pw / 2, 9, { align: 'center' });
-
-            doc.setFontSize(10); doc.setFont('helvetica', 'bold');
-            doc.text("SSE/BSS/NBQS", pw / 2, 15, { align: 'center' });
+            doc.setTextColor(255, 255, 255); 
+            doc.setFontSize(16); doc.setFont('helvetica', 'bold');
+            doc.text("Spring Report", pw / 2, 8, { align: 'center' });
             
-            doc.setFontSize(9); doc.setFont('helvetica', 'normal');
-            doc.text("App Created By Gobind Sharma", pw / 2, 21, { align: 'center' });
+            doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+            doc.text("SSE/BSS/NBQS", pw / 2, 13, { align: 'center' });
+            
+            doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+            doc.text("App Created By Gobind Sharma", pw / 2, 18, { align: 'center' });
 
             if (p === startPage) {
                 // PAGE 1 Top Right Code
-                doc.setFontSize(11); doc.setFont('helvetica', 'bold');
-                doc.text(`Code: ${code}`, pw - 15, 15, { align: 'right' });
+                doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+                doc.text(`Code: ${code}`, pw - 5, 12, { align: 'right' });
 
-                // DETAILS CARD (Page 1 Only)
-                let cardY = 28;
+                // DETAILS CARD (Page 1 Only) perfectly matched with table width (pw - 10)
+                let cardY = 26; 
                 let cardH = 22;
-                doc.setFillColor(25, 45, 100); // Solid premium dark blue matches the gradient
-                doc.roundedRect(10, cardY, pw - 20, cardH, 3, 3, 'F');
+                drawGradient(doc, 5, cardY, pw - 10, cardH, [15, 23, 42], [30, 58, 138]);
+                doc.setDrawColor(255, 255, 255); doc.setLineWidth(0.3);
+                doc.roundedRect(5, cardY, pw - 10, cardH, 2, 2, 'S');
                 
-                let col1X = 20, col2X = pw/2 - 40, col3X = pw - 60;
+                let col1X = 15, col2X = pw/2 - 40, col3X = pw - 55;
                 
-                doc.setTextColor(255); doc.setFontSize(9);
+                doc.setTextColor(255, 255, 255); doc.setFontSize(9);
                 
                 doc.setFont('helvetica', 'bold'); doc.text("From Date:", col1X, cardY + 7); doc.setFont('helvetica', 'normal'); doc.text(startDateStr, col1X + 22, cardY + 7);
                 doc.setFont('helvetica', 'bold'); doc.text("To Date:", col1X, cardY + 15); doc.setFont('helvetica', 'normal'); doc.text(endDateStr, col1X + 22, cardY + 15);
@@ -644,31 +649,31 @@
                 doc.setFont('helvetica', 'bold'); doc.text("Load:", col3X, cardY + 7); doc.setFont('helvetica', 'normal'); doc.text(details.load, col3X + 15, cardY + 7);
                 doc.setFont('helvetica', 'bold'); doc.text("Total:", col3X, cardY + 15); doc.setFont('helvetica', 'normal'); doc.text(total.toString(), col3X + 15, cardY + 15);
 
-                doc.setFont('helvetica', 'bold'); doc.text("Pass:", pw - 35, cardY + 7); doc.setFont('helvetica', 'normal'); doc.text(pass.toString(), pw - 20, cardY + 7);
-                doc.setFont('helvetica', 'bold'); doc.text("Fail:", pw - 35, cardY + 15); doc.setFont('helvetica', 'normal'); doc.text(fail.toString(), pw - 20, cardY + 15);
+                doc.setFont('helvetica', 'bold'); doc.text("Pass:", pw - 30, cardY + 7); doc.setFont('helvetica', 'normal'); doc.text(pass.toString(), pw - 15, cardY + 7);
+                doc.setFont('helvetica', 'bold'); doc.text("Fail:", pw - 30, cardY + 15); doc.setFont('helvetica', 'normal'); doc.text(fail.toString(), pw - 15, cardY + 15);
 
                 // Badges A, B, C
                 let badgeY = cardY + 8;
-                let badgeX = pw/2 + 25;
-                doc.setFillColor(253, 224, 71); doc.roundedRect(badgeX, badgeY, 14, 6, 2, 2, 'F');
-                doc.setTextColor(0); doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.text(`A - ${countA}`, badgeX + 7, badgeY + 4.2, {align: 'center'});
+                let badgeX = pw/2 + 30;
+                doc.setFillColor(253, 224, 71); doc.roundedRect(badgeX, badgeY, 15, 6, 2, 2, 'F');
+                doc.setTextColor(0); doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.text(`A - ${countA}`, badgeX + 7.5, badgeY + 4.2, {align: 'center'});
 
-                doc.setFillColor(59, 130, 246); doc.roundedRect(badgeX + 18, badgeY, 14, 6, 2, 2, 'F');
-                doc.setTextColor(255); doc.text(`B - ${countB}`, badgeX + 25, badgeY + 4.2, {align: 'center'});
+                doc.setFillColor(59, 130, 246); doc.roundedRect(badgeX + 18, badgeY, 15, 6, 2, 2, 'F');
+                doc.setTextColor(255); doc.text(`B - ${countB}`, badgeX + 25.5, badgeY + 4.2, {align: 'center'});
 
-                doc.setFillColor(34, 197, 94); doc.roundedRect(badgeX + 36, badgeY, 14, 6, 2, 2, 'F');
-                doc.setTextColor(0); doc.text(`C - ${countC}`, badgeX + 43, badgeY + 4.2, {align: 'center'});
+                doc.setFillColor(34, 197, 94); doc.roundedRect(badgeX + 36, badgeY, 15, 6, 2, 2, 'F');
+                doc.setTextColor(0); doc.text(`C - ${countC}`, badgeX + 43.5, badgeY + 4.2, {align: 'center'});
 
             } else {
                 // CONTINUATION PAGES Top Right Code
-                doc.setFontSize(11); doc.setFont('helvetica', 'bold');
-                doc.text(`Code: ${code} (Continued)`, pw - 15, 15, { align: 'right' });
+                doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+                doc.text(`Code: ${code} (Continued)`, pw - 5, 12, { align: 'right' });
             }
 
             // COMMON FOOTER
             const ph = doc.internal.pageSize.height;
             drawGradient(doc, 0, ph - 10, pw, 10, [15, 23, 42], [30, 58, 138]);
-            doc.setTextColor(255); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+            doc.setTextColor(255, 255, 255); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
             doc.text("App Created By Gobind Sharma", 10, ph - 4);
             doc.text(`Page ${p}`, pw - 15, ph - 4);
         }
