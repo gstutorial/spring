@@ -23,7 +23,7 @@
 
         .container {
             width: 100%;
-            max-width: 650px;
+            max-width: 700px;
             margin: auto;
             background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
             border-radius: 30px;
@@ -35,47 +35,27 @@
 
         .header { text-align: center; margin-bottom: 25px; }
         .title { font-size: 26px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        
         .creator-text { margin-top: 8px; font-size: 13px; color: #94a3b8; font-weight: 600; }
 
         /* Form Layout */
         .form-group { margin-bottom: 16px; }
         .form-row { display: flex; gap: 15px; margin-bottom: 16px; }
         .form-col { flex: 1; }
-        
         label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #cbd5e1; }
 
         .input-box {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 12px 16px;
-            border-radius: 12px;
-            color: white;
-            font-size: 14px;
-            outline: none;
-            transition: 0.3s;
+            width: 100%; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 12px 16px; border-radius: 12px; color: white; font-size: 14px; outline: none; transition: 0.3s;
         }
-        
         .input-box:focus { border-color: #38bdf8; background: rgba(255,255,255,0.1); }
         .input-box option { background: #0f172a; color: white; }
 
-        /* Period Buttons (Hidden by default, used for quick select) */
-        .period-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-        .period-btn {
-            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #cbd5e1; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.3s;
-        }
-        .period-btn:hover, .period-btn.active { background: #e11d48; border-color: #be123c; color: white; }
-
-        /* Action Buttons */
         .btn-row { display: flex; justify-content: space-between; margin-top: 30px; }
         .btn { border: none; border-radius: 12px; padding: 14px 30px; font-size: 15px; font-weight: 800; cursor: pointer; transition: 0.3s; }
         .btn-cancel { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.2); }
         .btn-save { background: #e11d48; color: white; box-shadow: 0 5px 15px rgba(225, 29, 72, 0.3); }
         .btn-save:hover { background: #be123c; }
 
-        /* Loader & Toast */
         #loader { display: none; text-align: center; margin-top: 20px; color: #38bdf8; font-weight: bold; }
         
         #toast {
@@ -85,7 +65,6 @@
             display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
 
-        /* Results Screen */
         #resultsScreen { display: none; animation: fadeIn 0.4s; }
         
         .code-card {
@@ -94,11 +73,13 @@
             transition: 0.3s ease;
         }
 
-        .card-header-toggle {
-            display: flex; justify-content: space-between; align-items: center;
-            cursor: pointer; user-select: none;
+        .all-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
         }
-        
+
+        .card-header-toggle { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
         .header-left { display: flex; align-items: center; gap: 12px; }
         .code-icon {
             width: 40px; height: 40px; border-radius: 50%;
@@ -111,19 +92,10 @@
         .toggle-arrow { transition: transform 0.3s ease; }
         .rotate-arrow { transform: rotate(180deg); }
 
-        .card-collapsible {
-            display: none; margin-top: 16px; padding-top: 16px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
+        .card-collapsible { display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); }
 
-        .summary-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 10px; margin-bottom: 16px;
-        }
-
-        .summary-box {
-            background: rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 8px; text-align: center;
-        }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 10px; margin-bottom: 16px; }
+        .summary-box { background: rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 8px; text-align: center; }
         .summary-number { font-size: 20px; font-weight: 900; color: #38bdf8; }
         .summary-label { font-size: 11px; color: #cbd5e1; margin-top: 4px; font-weight: bold; }
 
@@ -168,25 +140,10 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <label>Code</label>
-            <select id="selCode" class="input-box"><option value="">-- All --</option></select>
-        </div>
-
-        <div class="form-group">
-            <label>Group</label>
-            <select id="selGroup" class="input-box"><option value="">-- All --</option></select>
-        </div>
-
-        <div class="form-group">
-            <label>Make</label>
-            <select id="selMake" class="input-box"><option value="">-- All --</option></select>
-        </div>
-
-        <div class="form-group">
-            <label>User Name (Tested By)</label>
-            <select id="selUser" class="input-box"><option value="">-- All --</option></select>
-        </div>
+        <div class="form-group"><label>Code</label><select id="selCode" class="input-box"><option value="">-- All --</option></select></div>
+        <div class="form-group"><label>Group</label><select id="selGroup" class="input-box"><option value="">-- All --</option></select></div>
+        <div class="form-group"><label>Make</label><select id="selMake" class="input-box"><option value="">-- All --</option></select></div>
+        <div class="form-group"><label>User Name (Tested By)</label><select id="selUser" class="input-box"><option value="">-- All --</option></select></div>
 
         <div id="loader">Fetching and filtering data...</div>
 
@@ -205,31 +162,21 @@
         <div id="codeCardsContainer"></div>
 
         <button class="back-btn" onclick="goBack()">
-            <svg width="18" height="18" style="vertical-align: middle; margin-right: 5px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
+            <svg width="18" height="18" style="vertical-align: middle; margin-right: 5px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"></path><path d="M12 19l-7-7 7-7"></path></svg>
             Back to Search
         </button>
     </div>
-
 </div>
 
 <script>
-    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1WYK6dThqgY6vU-HpKggFXN0Roz3aq3wX99BTGDEkgcQ/export?format=csv&gid=0';
+    const DATA_URL = 'https://docs.google.com/spreadsheets/d/1WYK6dThqgY6vU-HpKggFXN0Roz3aq3wX99BTGDEkgcQ/export?format=csv&gid=0';
+    const CODE_URL = 'https://docs.google.com/spreadsheets/d/1WYK6dThqgY6vU-HpKggFXN0Roz3aq3wX99BTGDEkgcQ/export?format=csv&gid=2132794261';
     
-    // Column Indexes
-    const COL_DATE = 1;
-    const COL_MAKE = 2;
-    const COL_MFG = 3;
-    const COL_SL = 4;
-    const COL_FREE_HT = 5;
-    const COL_HT_LOAD = 7;
-    const COL_GROUP = 8;
-    const COL_CRACK = 9;
-    const COL_CAUSE = 10;
-    const COL_REMARK = 11;
-    const COL_CODE = 12;
-    const COL_USER = 18; // ModifiedByName
+    const COL_DATE = 1, COL_MAKE = 2, COL_MFG = 3, COL_SL = 4, COL_FREE_HT = 5, COL_HT_LOAD = 7;
+    const COL_GROUP = 8, COL_CRACK = 9, COL_REMARK = 11, COL_CODE = 12, COL_USER = 18; 
     
     let globalData = [];
+    let codeDetailsMap = {};
     let groupedFilteredData = {}; 
 
     window.onload = async () => {
@@ -239,38 +186,66 @@
 
         document.getElementById('loader').style.display = 'block';
         document.getElementById('loader').innerText = 'Initializing data...';
-        await fetchAndPopulateDropdowns();
+        await fetchAndPopulateData();
         document.getElementById('loader').style.display = 'none';
     };
 
     function getLocalYMD(d) {
         let month = '' + (d.getMonth() + 1), day = '' + d.getDate(), year = d.getFullYear();
-        if (month.length < 2) month = '0' + month;
-        if (day.length < 2) day = '0' + day;
-        return [year, month, day].join('-');
+        return [year, month.padStart(2,'0'), day.padStart(2,'0')].join('-');
     }
 
     function showToast(msg) {
         const t = document.getElementById('toast');
-        t.innerText = msg;
-        t.style.display = 'block';
+        t.innerText = msg; t.style.display = 'block';
         setTimeout(() => t.style.display = 'none', 3000);
     }
 
-    async function fetchAndPopulateDropdowns() {
+    // CSV Parser to safely handle commas inside quotes
+    function parseCSVLine(line) {
+        const result = [];
+        let cur = '', inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+            if (line[i] === '"') inQuotes = !inQuotes;
+            else if (line[i] === ',' && !inQuotes) { result.push(cur.trim()); cur = ''; }
+            else cur += line[i];
+        }
+        result.push(cur.trim());
+        return result;
+    }
+
+    async function fetchAndPopulateData() {
         try {
-            const response = await fetch(SHEET_URL);
-            const csvText = await response.text();
-            const lines = csvText.split('\n').filter(l => l.trim() !== '');
+            const [resData, resCode] = await Promise.all([fetch(DATA_URL), fetch(CODE_URL)]);
+            const csvData = await resData.text();
+            const csvCode = await resCode.text();
             
+            // Process Code Info Sheet
+            const codeLines = csvCode.split('\n').filter(l => l.trim() !== '');
+            const codeHeaders = parseCSVLine(codeLines[0]).map(h => h.toLowerCase());
+            
+            const idxC = codeHeaders.findIndex(h => h.includes('code'));
+            const idxB = codeHeaders.findIndex(h => h.includes('bogies'));
+            const idxS = codeHeaders.findIndex(h => h.includes('spring'));
+            const idxL = codeHeaders.findIndex(h => h.includes('load'));
+            
+            for (let i = 1; i < codeLines.length; i++) {
+                const row = parseCSVLine(codeLines[i]);
+                if (row[idxC]) {
+                    codeDetailsMap[row[idxC]] = { 
+                        bogie: row[idxB] || 'N/A', spring: row[idxS] || 'N/A', load: row[idxL] || 'N/A' 
+                    };
+                }
+            }
+
+            // Process Main Data Sheet
+            const lines = csvData.split('\n').filter(l => l.trim() !== '');
             const makes = new Set(), groups = new Set(), users = new Set(), codes = new Set();
             
             for (let i = 1; i < lines.length; i++) {
-                const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/^"|"$/g, '').trim() : '');
+                const row = parseCSVLine(lines[i]);
                 if (row.length < 10) continue; 
-                
                 globalData.push(row);
-                
                 if (row[COL_MAKE]) makes.add(row[COL_MAKE]);
                 if (row[COL_GROUP]) groups.add(row[COL_GROUP]);
                 if (row[COL_USER]) users.add(row[COL_USER]);
@@ -290,9 +265,7 @@
 
     function populateSelect(id, values) {
         const select = document.getElementById(id);
-        values.forEach(val => {
-            if(val) select.innerHTML += `<option value="${val}">${val}</option>`;
-        });
+        values.forEach(val => { if(val) select.innerHTML += `<option value="${val}">${val}</option>`; });
     }
 
     function parseDateCustom(dateStr) {
@@ -306,33 +279,24 @@
         const d = parseDateCustom(dateStr);
         if (!d || isNaN(d)) return dateStr;
         const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        return String(d.getDate()).padStart(2,'0') + '-' + months[d.getMonth()] + '-' + d.getFullYear();
+        return String(d.getDate()).padStart(2,'0') + '/' + months[d.getMonth()] + '/' + d.getFullYear();
     }
 
     function toggleCard(codeId) {
         const body = document.getElementById(`body-${codeId}`);
         const arrow = document.getElementById(`arrow-${codeId}`);
-        
         const isClosed = (body.style.display === 'none' || body.style.display === '');
         
-        // Close all others first
         document.querySelectorAll('.card-collapsible').forEach(el => el.style.display = 'none');
         document.querySelectorAll('.toggle-arrow').forEach(el => el.classList.remove('rotate-arrow'));
 
-        if (isClosed) {
-            body.style.display = 'block';
-            arrow.classList.add('rotate-arrow');
-        }
+        if (isClosed) { body.style.display = 'block'; arrow.classList.add('rotate-arrow'); }
     }
 
     function generateReport() {
         const startDateVal = document.getElementById('startDate').value;
         const endDateVal = document.getElementById('endDate').value;
-        
-        if (!startDateVal || !endDateVal) {
-            showToast("Please enter Start and End Date.");
-            return;
-        }
+        if (!startDateVal || !endDateVal) { showToast("Please enter Start and End Date."); return; }
 
         document.getElementById('loader').style.display = 'block';
 
@@ -348,7 +312,6 @@
             const filteredData = globalData.filter(row => {
                 const rowDate = parseDateCustom(row[COL_DATE]);
                 if (!rowDate) return false;
-                
                 let match = (rowDate >= startD && rowDate <= endD);
                 if (sMake && row[COL_MAKE] !== sMake) match = false;
                 if (sGroup && row[COL_GROUP] !== sGroup) match = false;
@@ -358,13 +321,8 @@
             });
 
             document.getElementById('loader').style.display = 'none';
-            
-            if (filteredData.length === 0) {
-                showToast("No records found for selected criteria.");
-                return;
-            }
+            if (filteredData.length === 0) { showToast("No records found for selected criteria."); return; }
 
-            // Group By Code
             groupedFilteredData = {};
             filteredData.forEach(row => {
                 const code = row[COL_CODE] || 'No Code';
@@ -372,7 +330,6 @@
                 groupedFilteredData[code].push(row);
             });
 
-            // Sort each group's data by Date
             Object.keys(groupedFilteredData).forEach(code => {
                 groupedFilteredData[code].sort((a,b) => parseDateCustom(a[COL_DATE]) - parseDateCustom(b[COL_DATE]));
             });
@@ -389,25 +346,37 @@
         const container = document.getElementById('codeCardsContainer');
         container.innerHTML = '';
 
+        // Add "ALL SECTIONS" Super Card
+        const allCard = document.createElement('div');
+        allCard.className = 'code-card all-card';
+        allCard.innerHTML = `
+            <div class="card-header-toggle" onclick="toggleCard('ALL')">
+                <div class="header-left">
+                    <div class="code-icon" style="background: linear-gradient(135deg, #10b981, #047857);">📚</div>
+                    <div><div class="code-title">ALL CODES COMBINED</div><div class="code-subtitle">Combine all sections in one PDF</div></div>
+                </div>
+                <div class="toggle-arrow" id="arrow-ALL">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+            </div>
+            <div class="card-collapsible" id="body-ALL">
+                <div class="action-btn-row">
+                    <button class="download-btn" onclick="downloadPDF(null, true)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download All</button>
+                    <button class="share-btn" onclick="sharePDF(null, true)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share All</button>
+                </div>
+            </div>`;
+        container.appendChild(allCard);
+
         Object.keys(groupedFilteredData).forEach((code, index) => {
             const dataRows = groupedFilteredData[code];
             const safeId = `code_${index}`;
 
-            // Calculate Group Totals inside this Code
             const groupCounts = {};
-            dataRows.forEach(r => {
-                const grp = r[COL_GROUP] || 'Blank';
-                groupCounts[grp] = (groupCounts[grp] || 0) + 1;
-            });
+            dataRows.forEach(r => { const grp = r[COL_GROUP] || 'Blank'; groupCounts[grp] = (groupCounts[grp] || 0) + 1; });
 
-            // Build Summary Grid HTML
             let summaryHtml = '<div class="summary-grid">';
             Object.keys(groupCounts).sort().forEach(g => {
-                summaryHtml += `
-                    <div class="summary-box">
-                        <div class="summary-number">${groupCounts[g]}</div>
-                        <div class="summary-label">Group ${g}</div>
-                    </div>`;
+                summaryHtml += `<div class="summary-box"><div class="summary-number">${groupCounts[g]}</div><div class="summary-label">Group ${g}</div></div>`;
             });
             summaryHtml += '</div>';
 
@@ -417,10 +386,7 @@
                 <div class="card-header-toggle" onclick="toggleCard('${safeId}')">
                     <div class="header-left">
                         <div class="code-icon">${code.substring(0,2)}</div>
-                        <div>
-                            <div class="code-title">Code: ${code}</div>
-                            <div class="code-subtitle">${dataRows.length} Entries</div>
-                        </div>
+                        <div><div class="code-title">Code: ${code}</div><div class="code-subtitle">${dataRows.length} Entries</div></div>
                     </div>
                     <div class="toggle-arrow" id="arrow-${safeId}">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -429,17 +395,10 @@
                 <div class="card-collapsible" id="body-${safeId}">
                     ${summaryHtml}
                     <div class="action-btn-row">
-                        <button class="download-btn" onclick="downloadPDF('${code}')">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                            Download
-                        </button>
-                        <button class="share-btn" onclick="sharePDF('${code}')">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                            Share
-                        </button>
+                        <button class="download-btn" onclick="downloadPDF('${code}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download</button>
+                        <button class="share-btn" onclick="sharePDF('${code}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share</button>
                     </div>
-                </div>
-            `;
+                </div>`;
             container.appendChild(card);
         });
     }
@@ -447,10 +406,7 @@
     function resetForm() {
         document.getElementById('startDate').value = getLocalYMD(new Date());
         document.getElementById('endDate').value = getLocalYMD(new Date());
-        document.getElementById('selMake').value = '';
-        document.getElementById('selGroup').value = '';
-        document.getElementById('selUser').value = '';
-        document.getElementById('selCode').value = '';
+        ['selMake', 'selGroup', 'selUser', 'selCode'].forEach(id => document.getElementById(id).value = '');
     }
 
     function goBack() {
@@ -458,180 +414,204 @@
         document.getElementById('formScreen').style.display = 'block';
     }
 
-    async function buildPDFBlob(targetCode) {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('landscape'); 
-        
-        const dataToPrint = groupedFilteredData[targetCode];
+    function buildCodePdfBlock(doc, code, dataToPrint) {
+        const details = codeDetailsMap[code] || { bogie: 'N/A', spring: 'N/A', load: 'N/A' };
+
+        let total = dataToPrint.length, pass = 0, fail = 0;
+        let countA = 0, countB = 0, countC = 0;
+        let failSummaryMap = {};
+
+        dataToPrint.forEach(r => {
+            const grp = (r[COL_GROUP] || '').toUpperCase();
+            if (grp === 'FAIL') {
+                fail++;
+                let cause = r[COL_REMARK] || 'Unknown';
+                let make = r[COL_MAKE] || '-';
+                let key = cause + '|' + make;
+                if(!failSummaryMap[key]) failSummaryMap[key] = { cause, make, count: 0 };
+                failSummaryMap[key].count++;
+            } else { pass++; }
+            
+            if(grp === 'A') countA++;
+            else if (grp === 'B') countB++;
+            else if (grp === 'C') countC++;
+        });
+
+        const failSummaryArr = Object.values(failSummaryMap);
 
         const dateCounts = {};
         dataToPrint.forEach(r => {
-            const d = r[COL_DATE];
-            dateCounts[d] = (dateCounts[d] || 0) + 1;
+            const d = r[COL_DATE]; dateCounts[d] = (dateCounts[d] || 0) + 1;
         });
 
         const bodyRows = [];
-        let currentGroup = -1;
-        let previousDate = '';
+        let currentGroup = -1, previousDate = '';
 
-        dataToPrint.forEach(r => {
+        dataToPrint.forEach((r, idx) => {
             let rawDate = r[COL_DATE];
             let displayDate = formatDisplayDate(rawDate);
+            
+            let cause = '', fMake = '', fTotal = '';
+            if (idx < failSummaryArr.length) {
+                cause = failSummaryArr[idx].cause;
+                fMake = failSummaryArr[idx].make;
+                fTotal = failSummaryArr[idx].count.toString();
+            }
 
-            // Columns specified: Date, Make, Mfg. Date, SL. No., Free Height, Height Under Load, Group, Crack, Remark(Cause of Failure), Tested By, Cause of Failure, Make, Total.
             let innerRow = [
-                r[COL_MAKE] || '',
-                r[COL_MFG] || '',
-                r[COL_SL] || '',
-                r[COL_FREE_HT] || '',
-                r[COL_HT_LOAD] || '',
-                r[COL_GROUP] || '',
-                r[COL_CRACK] || '',
-                r[COL_REMARK] || '', // Using Remark
-                r[COL_USER] || '',   // Tested By
-                r[COL_CAUSE] || '',  // Cause of Failure
-                r[COL_MAKE] || '',
-                '1'
+                r[COL_MAKE] || '', r[COL_MFG] || '', r[COL_SL] || '', r[COL_FREE_HT] || '', 
+                r[COL_HT_LOAD] || '', r[COL_GROUP] || '', r[COL_CRACK] || '', r[COL_REMARK] || '', 
+                r[COL_USER] || '',
+                cause, fMake, fTotal
             ];
 
             if (rawDate !== previousDate) {
-                currentGroup++;
-                bodyRows.push({
-                    row: [
-                        { content: displayDate, rowSpan: dateCounts[rawDate], styles: { valign: 'middle', halign: 'center', fontStyle: 'bold' } },
-                        ...innerRow
-                    ],
-                    group: currentGroup
-                });
-                previousDate = rawDate;
+                currentGroup++; previousDate = rawDate;
+                bodyRows.push({ row: [{ content: displayDate, rowSpan: dateCounts[rawDate] }, ...innerRow], grpIdx: currentGroup });
             } else {
-                bodyRows.push({ row: innerRow, group: currentGroup });
+                bodyRows.push({ row: innerRow, grpIdx: currentGroup });
             }
         });
 
-        const tableHeaders = ['Date', 'Make', 'Mfg.\nDate', 'SL. No.', 'Free\nHeight', 'Height Under\nLoad', 'Group', 'Crack', 'Remark', 'Tested By', 'Cause of\nFailure', 'Make', 'Total'];
+        const startDateStr = formatDisplayDate(document.getElementById('startDate').value);
+        const endDateStr = formatDisplayDate(document.getElementById('endDate').value);
 
         doc.autoTable({
-            startY: 35,
-            head: [tableHeaders],
+            startY: 55,
+            head: [
+                [ 
+                    { content: '', colSpan: 10, styles: { fillColor: [167, 203, 237], lineWidth: 0 } },
+                    { content: 'Failure Report', colSpan: 3, styles: { fillColor: [225, 29, 72], textColor: 255, halign: 'center', fontStyle: 'bold' } }
+                ],
+                [
+                    'Date', 'Make', 'Mfg. Date', 'SL. No.', 'Free Height', 'Height Under Load', 'Group', 'Crack', 'Remark', 'Tested By',
+                    'Cause of Failure', 'Make', 'Total'
+                ]
+            ],
             body: bodyRows.map(r => r.row),
             theme: 'grid',
-            styles: { fontSize: 7, cellPadding: 1.5, lineColor: [200, 200, 200], lineWidth: 0.1, valign: 'middle', overflow: 'linebreak' },
-            headStyles: { textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center', lineWidth: 0 },
-            columnStyles: {
-                0: { cellWidth: 20, halign: 'center' },
-                12: { halign: 'center', fontStyle: 'bold' }
-            },
+            styles: { fontSize: 7, cellPadding: 2, lineColor: [255, 255, 255], lineWidth: 0.5, valign: 'middle', textColor: 0 },
             didParseCell: function(data) {
-                if (data.section === 'head') { 
-                    data.cell.styles.fillColor = null; 
-                    data.cell.styles.lineWidth = 0;
+                if (data.section === 'head' && data.row.index === 1) {
+                    if (data.column.index === 9) { // Tested By
+                        data.cell.styles.fillColor = [253, 224, 71]; // Yellow
+                        data.cell.styles.textColor = [0, 0, 0];
+                    } else if (data.column.index >= 10) { // Failure columns
+                        data.cell.styles.fillColor = [225, 29, 72]; // Red
+                        data.cell.styles.textColor = [255, 255, 255];
+                    } else {
+                        data.cell.styles.fillColor = [147, 197, 253]; // Light Blue
+                        data.cell.styles.textColor = [0, 0, 0];
+                    }
+                    data.cell.styles.halign = 'center';
+                    data.cell.styles.fontStyle = 'bold';
                 }
                 if (data.section === 'body') {
                     const rowData = bodyRows[data.row.index];
-                    const bgColor = rowData.group % 2 === 0 ? [255, 255, 255] : [235, 243, 255]; 
-                    data.cell.styles.fillColor = bgColor;
+                    
+                    // Main Columns (Merge Colors by Date Group)
+                    if (data.column.index < 10) {
+                        data.cell.styles.fillColor = rowData.grpIdx % 2 === 0 ? [255, 255, 255] : [241, 245, 249]; 
+                    } 
+                    // Failure Report Columns (Strict Alternate Row Colors ignoring Date)
+                    else {
+                        data.cell.styles.fillColor = data.row.index % 2 === 0 ? [255, 255, 255] : [254, 226, 226]; // Light red tint for alternation
+                        if(data.column.index === 12) data.cell.styles.halign = 'center'; // Center the total
+                    }
+
+                    if(data.column.index === 0) { data.cell.styles.halign = 'center'; data.cell.styles.fontStyle = 'bold'; }
                 }
             },
-            willDrawCell: function(data) {
-                if (data.section === 'head') {
-                    let tableW = doc.internal.pageSize.width - 20;
-                    let relativeX = data.cell.x - 10;
-                    
-                    for (let i = 0; i <= data.cell.width; i += 0.5) { 
-                        let ratio = (relativeX + i) / tableW;
-                        ratio = Math.max(0, Math.min(1, ratio));
-                        let r = Math.round(30 + (37 - 30) * ratio);
-                        let g = Math.round(58 + (99 - 58) * ratio);
-                        let b = Math.round(138 + (235 - 138) * ratio);
-                        
-                        doc.setFillColor(r, g, b);
-                        let rectWidth = Math.min(0.6, data.cell.width - i);
-                        doc.rect(data.cell.x + i, data.cell.y, rectWidth, data.cell.height, 'F');
-                    }
-                }
+            didDrawPage: function (data) {
+                const pw = doc.internal.pageSize.width;
+                
+                // Top Header Background
+                doc.setFillColor(167, 203, 237);
+                doc.rect(0, 0, pw, 50, 'F');
+
+                // App Branding (Placeholder)
+                doc.setFillColor(56, 189, 248);
+                doc.rect(10, 5, 15, 15, 'F'); 
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(10);
+                doc.text("App", 12.5, 15);
+                
+                doc.setTextColor(0);
+                doc.setFontSize(9);
+                doc.text("Created By\nGobind Sharma", 30, 10);
+
+                // Main Title
+                doc.setFontSize(22);
+                doc.setFont('helvetica', 'bold');
+                doc.text("Spring Report", pw / 2, 18, { align: 'center' });
+
+                // Row 1 Meta
+                doc.setFontSize(10);
+                doc.text(`Start Date: ${startDateStr}`, 14, 30);
+                doc.text(`Code:`, pw/2 - 20, 30); doc.text(`${code}`, pw/2 + 20, 30);
+                doc.text(`Total:`, pw - 40, 30); doc.text(`${total}`, pw - 15, 30);
+
+                // Row 2 Meta
+                doc.text(`End Date: ${endDateStr}`, 14, 36);
+                doc.text(`Type of Bogies:`, pw/2 - 20, 36); doc.text(`${details.bogie}`, pw/2 + 20, 36);
+                doc.text(`Pass:`, pw - 40, 36); doc.text(`${pass}`, pw - 15, 36);
+
+                // Row 3 Meta (Group Boxes)
+                doc.setFillColor(253, 224, 71); // Yellow A
+                doc.rect(14, 40, 20, 6, 'F');
+                doc.text(`A - ${countA}`, 24, 44, {align: 'center'});
+                
+                doc.setFillColor(96, 165, 250); // Blue B
+                doc.rect(36, 40, 20, 6, 'F');
+                doc.text(`B - ${countB}`, 46, 44, {align: 'center'});
+                
+                doc.setFillColor(74, 222, 128); // Green C
+                doc.rect(58, 40, 20, 6, 'F');
+                doc.text(`C - ${countC}`, 68, 44, {align: 'center'});
+
+                doc.text(`Type of Spring:`, pw/2 - 20, 41); doc.text(`${details.spring}`, pw/2 + 20, 41);
+                doc.text(`Load:`, pw/2 - 20, 46); doc.text(`${details.load}`, pw/2 + 20, 46);
+                
+                doc.text(`Fail:`, pw - 40, 41); doc.text(`${fail}`, pw - 15, 41);
             }
         });
+    }
 
-        // Headers and Footers for every page
-        const pageCount = doc.internal.getNumberOfPages();
-        const pageHeight = doc.internal.pageSize.height;
-        const pageWidth = doc.internal.pageSize.width;
+    async function buildPDFBlob(targetCode, isAll = false) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape'); 
         
-        for(let i = 1; i <= pageCount; i++) {
-            doc.setPage(i);
-            
-            const headerHeight = 25;
-            for (let x = 0; x <= pageWidth; x += 0.5) {
-                let ratio = x / pageWidth;
-                let r = Math.round(15 + (30 - 15) * ratio);  
-                let g = Math.round(23 + (58 - 23) * ratio);
-                let b = Math.round(42 + (138 - 42) * ratio);
-                doc.setFillColor(r, g, b);
-                doc.rect(x, 0, 0.6, headerHeight, 'F'); 
+        if (isAll) {
+            const codes = Object.keys(groupedFilteredData);
+            for(let i = 0; i < codes.length; i++) {
+                if (i > 0) doc.addPage();
+                buildCodePdfBlock(doc, codes[i], groupedFilteredData[codes[i]]);
             }
-
-            const footerHeight = 12;
-            const footerY = pageHeight - footerHeight;
-            for (let x = 0; x <= pageWidth; x += 0.5) {
-                let ratio = x / pageWidth;
-                let r = Math.round(15 + (30 - 15) * ratio);
-                let g = Math.round(23 + (58 - 23) * ratio);
-                let b = Math.round(42 + (138 - 42) * ratio);
-                doc.setFillColor(r, g, b);
-                doc.rect(x, footerY, 0.6, footerHeight, 'F'); 
-            }
-
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(16);
-            doc.setFont('helvetica', 'bold');
-            doc.text(`SEARCH DATA WORK REPORT (Code: ${targetCode})`, pageWidth / 2, 10, {align:'center'});
-
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            const dRange = `FROM: ${formatDisplayDate(document.getElementById('startDate').value)}     TO: ${formatDisplayDate(document.getElementById('endDate').value)}`;
-            doc.text(dRange, pageWidth / 2, 18, {align:'center'});
-
-            doc.setFontSize(9);
-            doc.setTextColor(230, 240, 250);
-            doc.text('App Created By Gobind Sharma', 14, pageHeight - 4.5);
-            doc.text(`Page ${i} of ${pageCount}`, pageWidth - 20, pageHeight - 4.5);
+        } else {
+            buildCodePdfBlock(doc, targetCode, groupedFilteredData[targetCode]);
         }
-
+        
         return doc.output('blob');
     }
 
-    async function downloadPDF(code) {
+    async function downloadPDF(code, isAll = false) {
         try {
-            const blob = await buildPDFBlob(code);
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `Report_${code}_${document.getElementById('startDate').value}_to_${document.getElementById('endDate').value}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(a.href);
-        } catch (e) {
-            console.error(e);
-            showToast("Error generating PDF");
-        }
+            const blob = await buildPDFBlob(code, isAll);
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            const prefix = isAll ? 'ALL_CODES' : `Code_${code}`;
+            a.download = `Report_${prefix}_${document.getElementById('startDate').value}_to_${document.getElementById('endDate').value}.pdf`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
+        } catch (e) { console.error(e); showToast("Error generating PDF"); }
     }
 
-    async function sharePDF(code) {
+    async function sharePDF(code, isAll = false) {
         try {
-            const blob = await buildPDFBlob(code);
-            const filename = `Report_${code}_${document.getElementById('startDate').value}_to_${document.getElementById('endDate').value}.pdf`;
-            const file = new File([blob], filename, { type: 'application/pdf' });
-            
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({ files: [file] });
-            } else {
-                showToast('Sharing via browser not supported on this device.');
-            }
-        } catch (e) {
-            console.error(e);
-            showToast("Error sharing PDF");
-        }
+            const blob = await buildPDFBlob(code, isAll);
+            const prefix = isAll ? 'ALL_CODES' : `Code_${code}`;
+            const file = new File([blob], `Report_${prefix}.pdf`, { type: 'application/pdf' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file] }); } 
+            else { showToast('Sharing via browser not supported on this device.'); }
+        } catch (e) { console.error(e); showToast("Error sharing PDF"); }
     }
 </script>
 
