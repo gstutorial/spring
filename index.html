@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spring Data Report Generator</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <meta name="theme-color" content="#2563eb">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: radial-gradient(circle at top, #1e3a8a 0%, #0f172a 40%, #020617 100%);
+            min-height: 100vh;
+            padding: 15px;
+            color: white;
+            touch-action: manipulation;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+            border-radius: 30px;
+            padding: 24px;
+            border: 1px solid rgba(255,255,255,0.10);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.45);
+        }
+
+        .header { text-align: center; margin-bottom: 25px; }
+        .title { font-size: 26px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .title img { width: 40px; border-radius: 8px; }
+        
+        .creator-text {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        /* Form Layout */
+        .form-group { margin-bottom: 16px; }
+        .form-row { display: flex; gap: 15px; margin-bottom: 16px; }
+        .form-col { flex: 1; }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #cbd5e1;
+        }
+
+        .input-box {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+        }
+        
+        .input-box:focus { border-color: #38bdf8; background: rgba(255,255,255,0.1); }
+        .input-box option { background: #0f172a; color: white; }
+
+        /* Period Buttons */
+        .period-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .period-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #cbd5e1;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .period-btn:hover, .period-btn.active {
+            background: #e11d48; /* Red highlight matching your reference */
+            border-color: #be123c;
+            color: white;
+        }
+
+        /* Action Buttons */
+        .btn-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 12px;
+            padding: 14px 30px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: white;
+        }
+
+        .btn-save {
+            background: #e11d48; /* Red save button */
+            color: white;
+            box-shadow: 0 5px 15px rgba(225, 29, 72, 0.3);
+        }
+
+        .btn-save:hover { background: #be123c; }
+
+        /* Loader & Toast */
+        #loader {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            color: #38bdf8;
+            font-weight: bold;
+        }
+
+        #toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #111827, #1f2937);
+            padding: 14px 20px;
+            border-radius: 16px;
+            color: white;
+            font-weight: 700;
+            z-index: 9999;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        /* Results Screen */
+        #resultsScreen { display: none; text-align: center; animation: fadeIn 0.4s; }
+        
+        .result-card {
+            background: rgba(255,255,255,0.06);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .result-count { font-size: 40px; font-weight: 900; color: #38bdf8; margin: 10px 0; }
+        
+        .download-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div class="container">
+    <div class="header">
+        <div class="title">
+            <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            Search Data Form
+        </div>
+        <div class="creator-text">Created By Gobind Sharma</div>
+    </div>
+
+    <div id="formScreen">
+        <div class="form-row">
+            <div class="form-col">
+                <label>Start Date <span style="color:red">*</span></label>
+                <input type="date" id="startDate" class="input-box" required>
+            </div>
+            <div class="form-col">
+                <label>End Date <span style="color:red">*</span></label>
+                <input type="date" id="endDate" class="input-box" required>
+            </div>
+        </div>
+
+        <label>Period</label>
+        <div class="period-grid">
+            <button class="period-btn" onclick="setPeriod('today', this)">Today</button>
+            <button class="period-btn" onclick="setPeriod('thisMonth', this)">This Month</button>
+            <button class="period-btn" onclick="setPeriod('thisYear', this)">This Year</button>
+            <button class="period-btn" onclick="setPeriod('currentFY', this)">Current F.Y</button>
+        </div>
+
+        <div class="form-group">
+            <label>Code</label>
+            <select id="selCode" class="input-box"><option value="">-- All --</option></select>
+        </div>
+
+        <div class="form-group">
+            <label>Mfg. Year</label>
+            <select id="selMfgYear" class="input-box"><option value="">-- All --</option></select>
+        </div>
+
+        <div class="form-group">
+            <label>Group</label>
+            <select id="selGroup" class="input-box"><option value="">-- All --</option></select>
+        </div>
+
+        <div class="form-group">
+            <label>Make</label>
+            <select id="selMake" class="input-box"><option value="">-- All --</option></select>
+        </div>
+
+        <div class="form-group">
+            <label>User Name</label>
+            <select id="selUser" class="input-box"><option value="">-- All --</option></select>
+        </div>
+
+        <div id="loader">Fetching and filtering data...</div>
+
+        <div class="btn-row">
+            <button class="btn btn-cancel" onclick="resetForm()">Cancel</button>
+            <button class="btn btn-save" onclick="generateReport()">Generate</button>
+        </div>
+    </div>
+
+    <div id="resultsScreen">
+        <div class="result-card">
+            <h3>Report Generated</h3>
+            <div class="result-count" id="recordCount">0</div>
+            <div style="color:#cbd5e1; font-size: 14px; margin-bottom: 20px;">Records Found</div>
+            
+            <button class="download-btn" onclick="downloadPDF()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download PDF
+            </button>
+            <button class="download-btn" style="background: linear-gradient(135deg, #2563eb, #38bdf8);" onclick="sharePDF()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                Share PDF
+            </button>
+        </div>
+        <button class="back-btn" onclick="goBack()">Back to Search</button>
+    </div>
+
+</div>
+
+<script>
+    // Replace htmlview URL with CSV export URL
+    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1WYK6dThqgY6vU-HpKggFXN0Roz3aq3wX99BTGDEkgcQ/export?format=csv&gid=0';
+    
+    // Column Mapping - Adjust these indices based on your actual Google Sheet column layout
+    const COL_DATE = 0;
+    const COL_MAKE = 1;
+    const COL_MFG = 2;
+    const COL_GROUP = 6; // Assuming Group is col G (index 6)
+    const COL_USER = 9; // Assuming Tested By is col J (index 9)
+    const COL_CODE = 12; // Update with actual Code column index if exists
+    
+    let globalData = [];
+    let filteredData = [];
+    let headers = [];
+
+    window.onload = async () => {
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('loader').innerText = 'Initializing data...';
+        await fetchAndPopulateDropdowns();
+        document.getElementById('loader').style.display = 'none';
+        setPeriod('currentFY', document.querySelectorAll('.period-btn')[3]); // Default to Current F.Y
+    };
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 3000);
+    }
+
+    async function fetchAndPopulateDropdowns() {
+        try {
+            const response = await fetch(SHEET_URL);
+            const csvText = await response.text();
+            const lines = csvText.split('\n').filter(l => l.trim() !== '');
+            
+            headers = lines[0].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(h => h.replace(/^"|"$/g, '').trim());
+            
+            const makes = new Set(), mfgs = new Set(), groups = new Set(), users = new Set(), codes = new Set();
+            
+            for (let i = 1; i < lines.length; i++) {
+                const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c ? c.replace(/^"|"$/g, '').trim() : '');
+                if (row.length < 5) continue;
+                
+                globalData.push(row);
+                
+                if (row[COL_MAKE]) makes.add(row[COL_MAKE]);
+                if (row[COL_MFG]) mfgs.add(row[COL_MFG]);
+                if (row[COL_GROUP]) groups.add(row[COL_GROUP]);
+                if (row[COL_USER]) users.add(row[COL_USER]);
+                if (row[COL_CODE]) codes.add(row[COL_CODE]);
+            }
+
+            populateSelect('selMake', [...makes].sort());
+            populateSelect('selMfgYear', [...mfgs].sort());
+            populateSelect('selGroup', [...groups].sort());
+            populateSelect('selUser', [...users].sort());
+            populateSelect('selCode', [...codes].sort());
+
+        } catch (error) {
+            console.error(error);
+            showToast("Failed to load Google Sheet data.");
+        }
+    }
+
+    function populateSelect(id, values) {
+        const select = document.getElementById(id);
+        values.forEach(val => {
+            if(val) select.innerHTML += `<option value="${val}">${val}</option>`;
+        });
+    }
+
+    function setPeriod(type, btnElement) {
+        document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
+        if(btnElement) btnElement.classList.add('active');
+
+        const today = new Date();
+        let start, end;
+
+        if (type === 'today') {
+            start = end = today;
+        } else if (type === 'thisMonth') {
+            start = new Date(today.getFullYear(), today.getMonth(), 1);
+            end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        } else if (type === 'thisYear') {
+            start = new Date(today.getFullYear(), 0, 1);
+            end = new Date(today.getFullYear(), 11, 31);
+        } else if (type === 'currentFY') {
+            // Indian FY: April 1 to March 31
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth(); // 0 = Jan, 3 = Apr
+            if (currentMonth >= 3) {
+                start = new Date(currentYear, 3, 1);
+                end = new Date(currentYear + 1, 2, 31);
+            } else {
+                start = new Date(currentYear - 1, 3, 1);
+                end = new Date(currentYear, 2, 31);
+            }
+        }
+
+        const format = d => {
+            let month = '' + (d.getMonth() + 1), day = '' + d.getDate(), year = d.getFullYear();
+            if (month.length < 2) month = '0' + month;
+            if (day.length < 2) day = '0' + day;
+            return [year, month, day].join('-');
+        };
+
+        document.getElementById('startDate').value = format(start);
+        document.getElementById('endDate').value = format(end);
+    }
+
+    function parseDateCustom(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split('/');
+        if (parts.length === 3) {
+            return new Date(parts[2], parts[1] - 1, parts[0]); // DD/MM/YYYY
+        }
+        return new Date(dateStr);
+    }
+
+    function generateReport() {
+        const startDateVal = document.getElementById('startDate').value;
+        const endDateVal = document.getElementById('endDate').value;
+        
+        if (!startDateVal || !endDateVal) {
+            showToast("Please enter Start and End Date.");
+            return;
+        }
+
+        document.getElementById('loader').style.display = 'block';
+
+        setTimeout(() => {
+            const startD = new Date(startDateVal);
+            const endD = new Date(endDateVal);
+            endD.setHours(23, 59, 59);
+
+            const sMake = document.getElementById('selMake').value;
+            const sMfg = document.getElementById('selMfgYear').value;
+            const sGroup = document.getElementById('selGroup').value;
+            const sUser = document.getElementById('selUser').value;
+            const sCode = document.getElementById('selCode').value;
+
+            filteredData = globalData.filter(row => {
+                const rowDate = parseDateCustom(row[COL_DATE]);
+                if (!rowDate) return false;
+                
+                let match = (rowDate >= startD && rowDate <= endD);
+                if (sMake && row[COL_MAKE] !== sMake) match = false;
+                if (sMfg && row[COL_MFG] !== sMfg) match = false;
+                if (sGroup && row[COL_GROUP] !== sGroup) match = false;
+                if (sUser && row[COL_USER] !== sUser) match = false;
+                if (sCode && row[COL_CODE] !== sCode) match = false;
+
+                return match;
+            });
+
+            document.getElementById('loader').style.display = 'none';
+            
+            if (filteredData.length === 0) {
+                showToast("No records found for selected criteria.");
+            } else {
+                document.getElementById('recordCount').innerText = filteredData.length;
+                document.getElementById('formScreen').style.display = 'none';
+                document.getElementById('resultsScreen').style.display = 'block';
+            }
+        }, 300);
+    }
+
+    function resetForm() {
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
+        document.getElementById('selMake').value = '';
+        document.getElementById('selMfgYear').value = '';
+        document.getElementById('selGroup').value = '';
+        document.getElementById('selUser').value = '';
+        document.getElementById('selCode').value = '';
+        document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    function goBack() {
+        document.getElementById('resultsScreen').style.display = 'none';
+        document.getElementById('formScreen').style.display = 'block';
+    }
+
+    async function buildPDFBlob() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape'); // Landscape for tabular data
+        
+        // Header styling
+        doc.setFillColor(30, 58, 138); // Dark blue header background
+        doc.rect(0, 0, 297, 25, 'F');
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Filtered Data Report', 148.5, 12, { align: 'center' });
+
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        const dRange = `${document.getElementById('startDate').value} to ${document.getElementById('endDate').value}`;
+        doc.text(`Date Range: ${dRange}`, 148.5, 18, { align: 'center' });
+        
+        // Data Table Mapping
+        const tableBody = filteredData.map(row => {
+            // Mapping top 10 columns for standard landscape fit, customize as needed
+            return row.slice(0, 10); 
+        });
+        
+        const tableHeaders = headers.slice(0, 10);
+
+        doc.autoTable({
+            startY: 30,
+            head: [tableHeaders],
+            body: tableBody,
+            theme: 'grid',
+            styles: { fontSize: 8, cellPadding: 2, valign: 'middle' },
+            headStyles: { fillColor: [225, 29, 72], textColor: 255, fontStyle: 'bold' },
+            alternateRowStyles: { fillColor: [240, 245, 255] }
+        });
+
+        // Footer
+        const pageCount = doc.internal.getNumberOfPages();
+        for(let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(9);
+            doc.setTextColor(100);
+            doc.text('Generated via Search Data App - Created by Gobind Sharma', 14, doc.internal.pageSize.height - 10);
+            doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 25, doc.internal.pageSize.height - 10);
+        }
+
+        return doc.output('blob');
+    }
+
+    async function downloadPDF() {
+        try {
+            const blob = await buildPDFBlob();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Report_${document.getElementById('startDate').value}_to_${document.getElementById('endDate').value}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+        } catch (e) {
+            console.error(e);
+            showToast("Error generating PDF");
+        }
+    }
+
+    async function sharePDF() {
+        try {
+            const blob = await buildPDFBlob();
+            const filename = `Report_${document.getElementById('startDate').value}_to_${document.getElementById('endDate').value}.pdf`;
+            const file = new File([blob], filename, { type: 'application/pdf' });
+            
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({ files: [file] });
+            } else {
+                showToast('Sharing via browser not supported on this device.');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast("Error sharing PDF");
+        }
+    }
+</script>
+
+</body>
+</html>
