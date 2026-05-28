@@ -116,15 +116,17 @@
 </head>
 <body>
 
+<img src="gs.png" id="pdfLogo" style="display: none;" crossorigin="anonymous" onerror="this.onerror=null; this.dataset.failed='true';">
+
 <div id="toast"></div>
 
 <div class="container">
     <div class="header">
         <div class="title">
             <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-            Search Data Form
+            Spring Report Generator
         </div>
-        <div class="creator-text">Created By Gobind Sharma</div>
+        <div class="creator-text">App Created By Gobind Sharma</div>
     </div>
 
     <div id="formScreen">
@@ -144,7 +146,7 @@
         <div class="form-group"><label>Make</label><select id="selMake" class="input-box"><option value="">-- All --</option></select></div>
         <div class="form-group"><label>User Name (Tested By)</label><select id="selUser" class="input-box"><option value="">-- All --</option></select></div>
 
-        <div id="loader">Fetching and filtering data...</div>
+        <div id="loader">Fetching and processing data...</div>
 
         <div class="btn-row">
             <button class="btn btn-cancel" onclick="resetForm()">Reset</button>
@@ -418,14 +420,28 @@
         document.getElementById('formScreen').style.display = 'block';
     }
 
-    function buildCodePdfBlock(doc, code, dataToPrint) {
+    // Gradient helper for jsPDF
+    function drawGradient(doc, x, y, w, h, startColor, endColor) {
+        for (let i = 0; i <= w; i += 0.5) {
+            let ratio = i / w;
+            let r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * ratio);
+            let g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * ratio);
+            let b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * ratio);
+            doc.setFillColor(r, g, b);
+            doc.rect(x + i, y, 0.6, h, 'F');
+        }
+    }
+
+    function buildCodePdfBlock(doc, code, dataToPrint, isFirstCodeObj) {
+        if (!isFirstCodeObj.val) doc.addPage();
+        isFirstCodeObj.val = false;
+
         const details = codeDetailsMap[code] || { bogie: 'N/A', spring: 'N/A', load: 'N/A' };
 
         let total = dataToPrint.length, pass = 0, fail = 0;
         let countA = 0, countB = 0, countC = 0;
         let failSummaryMap = {};
 
-        // Calculate Metadata & Failure Summary
         dataToPrint.forEach(r => {
             const grp = (r[COL_GROUP] || '').toUpperCase();
             if (grp === 'FAIL') {
@@ -443,52 +459,33 @@
         });
 
         const failSummaryArr = Object.values(failSummaryMap);
-        
-        const bodyRows = [];
-        let i = 0;
-        let failIdx = 0;
 
-        // Strict contiguous block grouping logic
+        const mainRows = [];
+        let i = 0, currentGroup = -1;
+
         while (i < dataToPrint.length) {
             let startRow = dataToPrint[i];
             let displayDate = startRow.displayDate;
-            
             let span = 1;
-            while (i + span < dataToPrint.length && dataToPrint[i + span].displayDate === displayDate) {
-                span++;
-            }
+            while (i + span < dataToPrint.length && dataToPrint[i + span].displayDate === displayDate) span++;
             
+            currentGroup++;
             for (let j = 0; j < span; j++) {
                 let r = dataToPrint[i + j];
+                // Using COL_CAUSE for 'Remark' as instructed
+                let innerRow = [ r[COL_MAKE] || '', r[COL_MFG] || '', r[COL_SL] || '', r[COL_FREE_HT] || '', r[COL_HT_LOAD] || '', r[COL_GROUP] || '', r[COL_CRACK] || '', r[COL_CAUSE] || '', r[COL_USER] || '' ];
                 
-                let cause = '', fMake = '', fTotal = '';
-                if (failIdx < failSummaryArr.length) {
-                    cause = failSummaryArr[failIdx].cause;
-                    fMake = failSummaryArr[failIdx].make;
-                    fTotal = failSummaryArr[failIdx].count.toString();
-                    failIdx++;
-                }
-
-                // Note: r[COL_CAUSE] represents the 'Remark' column based on your instructions
-                let innerRow = [
-                    r[COL_MAKE] || '', r[COL_MFG] || '', r[COL_SL] || '', r[COL_FREE_HT] || '', 
-                    r[COL_HT_LOAD] || '', r[COL_GROUP] || '', r[COL_CRACK] || '', r[COL_CAUSE] || '', 
-                    r[COL_USER] || '', cause, fMake, fTotal
-                ];
-
                 if (j === 0) {
-                    // First row of date group gets the merged cell
-                    bodyRows.push([
-                        { content: displayDate, rowSpan: span, styles: { valign: 'top', halign: 'center' } }, 
-                        ...innerRow
-                    ]);
+                    mainRows.push({ row: [{ content: displayDate, rowSpan: span, styles: { valign: 'middle', halign: 'center' } }, ...innerRow], grpIdx: currentGroup });
                 } else {
-                    bodyRows.push(innerRow);
+                    mainRows.push({ row: innerRow, grpIdx: currentGroup });
                 }
             }
             i += span;
         }
 
+        const failRows = failSummaryArr.map(f => [f.cause, f.make, f.count.toString()]);
+        
         const formatForHeader = (dateStr) => {
             const d = new Date(dateStr);
             const months = ['01','02','03','04','05','06','07','08','09','10','11','12'];
@@ -497,119 +494,163 @@
         
         const startDateStr = formatForHeader(document.getElementById('startDate').value);
         const endDateStr = formatForHeader(document.getElementById('endDate').value);
+        
         const pw = doc.internal.pageSize.width;
+        let startPage = doc.internal.getCurrentPageInfo().pageNumber;
 
-        // ==========================================
-        // RENDER STATIC METADATA (FIRST PAGE ONLY)
-        // ==========================================
-        let currentY = 18; 
-        
-        // Background for Header Block
-        doc.setFillColor(167, 203, 237); // Light Blue Background
-        doc.rect(0, 0, pw, 45, 'F');
-        
-        // Title
-        doc.setTextColor(0); doc.setFontSize(20); doc.setFont('helvetica', 'bold');
-        doc.text("Spring Report", pw / 2, 14, { align: 'center' });
-
-        doc.setFontSize(8); doc.setFont('helvetica', 'bold');
-        doc.text("App", 14, 10); doc.setFont('helvetica', 'normal');
-        doc.text("Created By\nGobind Sharma", 14, 14);
-
-        // Meta Column 1
-        doc.setFontSize(9); doc.setFont('helvetica', 'bold');
-        doc.text("Start Date:", 14, currentY + 7); doc.setFont('helvetica', 'normal'); doc.text(startDateStr, 35, currentY + 7);
-        doc.setFont('helvetica', 'bold'); doc.text("End Date:", 14, currentY + 12); doc.setFont('helvetica', 'normal'); doc.text(endDateStr, 35, currentY + 12);
-        
-        // Meta Column 2
-        doc.setFont('helvetica', 'bold'); doc.text("Code:", pw/2 - 40, currentY + 7); doc.setFont('helvetica', 'normal'); doc.text(code, pw/2 - 10, currentY + 7);
-        doc.setFont('helvetica', 'bold'); doc.text("Type of Bogies:", pw/2 - 40, currentY + 12); doc.setFont('helvetica', 'normal'); doc.text(details.bogie, pw/2 - 10, currentY + 12);
-        doc.setFont('helvetica', 'bold'); doc.text("Type of Spring:", pw/2 - 40, currentY + 17); doc.setFont('helvetica', 'normal'); doc.text(details.spring, pw/2 - 10, currentY + 17);
-        doc.setFont('helvetica', 'bold'); doc.text("Load:", pw/2 - 40, currentY + 22); doc.setFont('helvetica', 'normal'); doc.text(details.load, pw/2 - 10, currentY + 22);
-
-        // Meta Column 3
-        doc.setFont('helvetica', 'bold');
-        doc.text("Total:", pw - 35, currentY + 7); doc.setFont('helvetica', 'normal'); doc.text(total.toString(), pw - 20, currentY + 7);
-        doc.setFont('helvetica', 'bold'); doc.text("Pass:", pw - 35, currentY + 12); doc.setFont('helvetica', 'normal'); doc.text(pass.toString(), pw - 20, currentY + 12);
-        doc.setFont('helvetica', 'bold'); doc.text("Fail:", pw - 35, currentY + 17); doc.setFont('helvetica', 'normal'); doc.text(fail.toString(), pw - 20, currentY + 17);
-
-        // A, B, C Group Badges
-        let badgeY = currentY + 18;
-        doc.setFillColor(253, 224, 71); doc.rect(14, badgeY, 18, 5, 'F');
-        doc.setTextColor(0); doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.text(`A - ${countA}`, 23, badgeY + 3.5, {align: 'center'});
-        
-        doc.setFillColor(96, 165, 250); doc.rect(34, badgeY, 18, 5, 'F');
-        doc.text(`B - ${countB}`, 43, badgeY + 3.5, {align: 'center'});
-        
-        doc.setFillColor(74, 222, 128); doc.rect(54, badgeY, 18, 5, 'F');
-        doc.text(`C - ${countC}`, 63, badgeY + 3.5, {align: 'center'});
-        
-        // Add Failure Report Top Text Over Red Area
-        doc.setFontSize(9); doc.text("Failure Report", pw - 14, 43, {align: 'right'});
-
-        // ==========================================
-        // RENDER DATA TABLE
-        // ==========================================
+        // TABLE 1: MAIN DATA (Left Side)
         doc.autoTable({
-            startY: 45, // Leaves space for static header on first page
-            margin: { top: 15 }, // Subsequent pages start tightly at the top
-            head: [
-                [ 'Date', 'Make', 'Mfg. Date', 'SL. No.', 'Free Height', 'Height Under Load', 'Group', 'Crack', 'Remark', 'Tested By', 'Cause of Failure', 'Make', 'Total' ]
-            ],
-            body: bodyRows,
+            startY: 75, // Leaves space for Full Header on first page
+            margin: { left: 5, right: 110, bottom: 10 }, 
+            head: [[ 'Date', 'Make', 'Mfg. Date', 'SL. No.', 'Free Height', 'Height Under Load', 'Group', 'Crack', 'Remark', 'Tested By' ]],
+            body: mainRows.map(r => r.row),
             theme: 'grid',
-            styles: { fontSize: 7, cellPadding: 2, lineColor: [180, 180, 180], lineWidth: 0.1, valign: 'middle', textColor: 0 },
+            styles: { fontSize: 7, cellPadding: 2, lineColor: [200, 200, 200], lineWidth: 0.1, valign: 'middle' },
             didParseCell: function(data) {
-                if (data.section === 'head') {
-                    if (data.column.index < 9) { 
-                        data.cell.styles.fillColor = [167, 203, 237]; 
-                        data.cell.styles.textColor = 0; 
-                    } else if (data.column.index === 9) {
-                        data.cell.styles.fillColor = [253, 224, 71]; // Yellow for Tested By
-                        data.cell.styles.textColor = 0;
-                    } else { 
-                        data.cell.styles.fillColor = [239, 68, 68]; // Red for Failure Report headers
-                        data.cell.styles.textColor = 255; 
-                    }
-                    data.cell.styles.halign = 'center'; 
+                if (data.section === 'head') { 
+                    data.cell.styles.lineWidth = 0; 
+                    data.cell.styles.textColor = 255;
+                    data.cell.styles.halign = 'center';
                 }
                 if (data.section === 'body') {
-                    // Set clean white background for all standard rows per the screenshot
-                    data.cell.styles.fillColor = [255, 255, 255]; 
-                    if(data.column.index >= 10 && data.column.index <= 12) {
-                        data.cell.styles.halign = 'center'; 
-                    }
+                    const grpIdx = mainRows[data.row.index].grpIdx;
+                    data.cell.styles.fillColor = grpIdx % 2 === 0 ? [255, 255, 255] : [248, 250, 252]; 
+                    if(data.column.index === 0) data.cell.styles.fontStyle = 'bold';
                 }
             },
-            didDrawPage: function (data) {
-                // Draw thin top bar for continuation pages (page > 1 for this autoTable instance)
-                if (data.pageCount > 1) {
-                    doc.setFillColor(167, 203, 237);
-                    doc.rect(0, 0, pw, 15, 'F');
-                    doc.setTextColor(0); doc.setFontSize(12); doc.setFont('helvetica', 'bold');
-                    doc.text(`Spring Report - Code: ${code} (Continued)`, pw / 2, 10, { align: 'center' });
+            willDrawCell: function(data) {
+                if (data.section === 'head') {
+                    drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [30, 58, 138], [56, 189, 248]);
                 }
-                
-                // Footer repeats on all pages
-                doc.setTextColor(150); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
-                doc.text("App Created By Gobind Sharma", 14, doc.internal.pageSize.height - 5);
-                doc.text(`Page ${doc.internal.getNumberOfPages()}`, pw - 20, doc.internal.pageSize.height - 5);
             }
         });
+
+        let mainEndPage = doc.internal.getCurrentPageInfo().pageNumber;
+        doc.setPage(startPage);
+
+        // TABLE 2: FAILURE REPORT (Right Side)
+        doc.autoTable({
+            startY: 75,
+            margin: { left: 192, right: 5, bottom: 10 },
+            head: [[ 'Cause of Failure', 'Make', 'Total' ]],
+            body: failRows,
+            theme: 'grid',
+            styles: { fontSize: 7, cellPadding: 2, lineColor: [200, 200, 200], lineWidth: 0.1, valign: 'middle' },
+            didParseCell: function(data) {
+                if (data.section === 'head') { 
+                    data.cell.styles.lineWidth = 0; 
+                    data.cell.styles.textColor = 255;
+                    data.cell.styles.halign = 'center';
+                }
+                if (data.section === 'body') {
+                    data.cell.styles.fillColor = data.row.index % 2 === 0 ? [255, 255, 255] : [254, 226, 226]; 
+                    if(data.column.index === 2) data.cell.styles.halign = 'center'; 
+                }
+            },
+            willDrawCell: function(data) {
+                if (data.section === 'head') {
+                    drawGradient(doc, data.cell.x, data.cell.y, data.cell.width, data.cell.height, [159, 18, 57], [244, 63, 94]);
+                }
+            }
+        });
+
+        let maxPage = Math.max(mainEndPage, doc.internal.getCurrentPageInfo().pageNumber);
+
+        // Render Headers and Footers for all pages of THIS code block
+        for (let p = startPage; p <= maxPage; p++) {
+            doc.setPage(p);
+            
+            if (p === startPage) {
+                // ================= FULL HEADER (Page 1 of Code) =================
+                drawGradient(doc, 0, 0, pw, 35, [15, 23, 42], [30, 58, 138]);
+                
+                // Try grabbing the image
+                try {
+                    const img = document.getElementById('pdfLogo');
+                    if (img && !img.dataset.failed) doc.addImage(img, 'PNG', 10, 4.5, 26, 26);
+                } catch(e) {}
+
+                doc.setTextColor(255); doc.setFontSize(22); doc.setFont('helvetica', 'bold');
+                doc.text("Spring Report", pw / 2, 12, { align: 'center' });
+                
+                doc.setFontSize(10);
+                doc.text("SSE/BSS/NBQS", pw / 2, 19, { align: 'center' });
+                
+                doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+                doc.text("App Created By Gobind Sharma", pw / 2, 26, { align: 'center' });
+
+                // DETAILS CARD
+                doc.setFillColor(255, 255, 255);
+                doc.setDrawColor(200, 200, 200);
+                doc.roundedRect(5, 38, pw - 10, 32, 3, 3, 'FD');
+
+                doc.setTextColor(0); doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+                
+                // Col 1
+                doc.text("From Date:", 10, 45); doc.setFont('helvetica', 'normal'); doc.text(startDateStr, 35, 45);
+                doc.setFont('helvetica', 'bold'); doc.text("To Date:", 10, 52); doc.setFont('helvetica', 'normal'); doc.text(endDateStr, 35, 52);
+                doc.setFont('helvetica', 'bold'); doc.text("Code:", 10, 59); doc.setFont('helvetica', 'normal'); doc.text(code, 35, 59);
+                
+                // Col 2
+                doc.setFont('helvetica', 'bold'); doc.text("Type of Bogies:", pw/2 - 50, 45); doc.setFont('helvetica', 'normal'); doc.text(details.bogie, pw/2 - 20, 45);
+                doc.setFont('helvetica', 'bold'); doc.text("Type of Spring:", pw/2 - 50, 52); doc.setFont('helvetica', 'normal'); doc.text(details.spring, pw/2 - 20, 52);
+                doc.setFont('helvetica', 'bold'); doc.text("Load:", pw/2 - 50, 59); doc.setFont('helvetica', 'normal'); doc.text(details.load, pw/2 - 20, 59);
+
+                // Col 3
+                doc.setFont('helvetica', 'bold');
+                doc.text("Total:", pw - 45, 45); doc.setFont('helvetica', 'normal'); doc.text(total.toString(), pw - 30, 45);
+                doc.setFont('helvetica', 'bold'); doc.text("Pass:", pw - 45, 52); doc.setFont('helvetica', 'normal'); doc.text(pass.toString(), pw - 30, 52);
+                doc.setFont('helvetica', 'bold'); doc.text("Fail:", pw - 45, 59); doc.setFont('helvetica', 'normal'); doc.text(fail.toString(), pw - 30, 59);
+
+                // Badges
+                let circleY = 60;
+                doc.setFillColor(253, 224, 71); doc.circle(85, circleY, 5, 'F');
+                doc.setTextColor(0); doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.text(`A \n${countA}`, 85, circleY - 1, {align: 'center'});
+                
+                doc.setFillColor(96, 165, 250); doc.circle(105, circleY, 5, 'F');
+                doc.text(`B \n${countB}`, 105, circleY - 1, {align: 'center'});
+                
+                doc.setFillColor(74, 222, 128); doc.circle(125, circleY, 5, 'F');
+                doc.text(`C \n${countC}`, 125, circleY - 1, {align: 'center'});
+
+                // Table Titles
+                doc.setFontSize(10); doc.setTextColor(30, 58, 138);
+                doc.text("Daily Working Report", pw/2 - 50, 72.5, {align: 'center'});
+                doc.setTextColor(159, 18, 57);
+                doc.text("Failure Report", pw - 50, 72.5, {align: 'center'});
+
+            } else {
+                // ================= SIMPLE HEADER (Continuation Pages) =================
+                drawGradient(doc, 0, 0, pw, 15, [15, 23, 42], [30, 58, 138]);
+                doc.setTextColor(255); doc.setFontSize(12); doc.setFont('helvetica', 'bold');
+                doc.text(`Spring Report - Code: ${code} (Continued)`, pw / 2, 10, { align: 'center' });
+            }
+
+            // ================= COMMON FOOTER =================
+            const ph = doc.internal.pageSize.height;
+            drawGradient(doc, 0, ph - 10, pw, 10, [15, 23, 42], [30, 58, 138]);
+            doc.setTextColor(255); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+            doc.text("App Created By Gobind Sharma", 10, ph - 4);
+            doc.text(`Page ${p}`, pw - 15, ph - 4);
+        }
+        
+        // Ensure autoTable's pointer is placed at the very end of this code block's render space
+        doc.setPage(maxPage); 
     }
 
     async function buildPDFBlob(targetCode, isAll = false) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('landscape'); 
         
+        let isFirstCodeObj = { val: true };
+
         if (isAll) {
             const codes = Object.keys(groupedFilteredData);
             for(let i = 0; i < codes.length; i++) {
-                if (i > 0) doc.addPage();
-                buildCodePdfBlock(doc, codes[i], groupedFilteredData[codes[i]]);
+                buildCodePdfBlock(doc, codes[i], groupedFilteredData[codes[i]], isFirstCodeObj);
             }
         } else {
-            buildCodePdfBlock(doc, targetCode, groupedFilteredData[targetCode]);
+            buildCodePdfBlock(doc, targetCode, groupedFilteredData[targetCode], isFirstCodeObj);
         }
         
         return doc.output('blob');
