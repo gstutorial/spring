@@ -37,7 +37,6 @@
         .title { font-size: 26px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .creator-text { margin-top: 8px; font-size: 13px; color: #94a3b8; font-weight: 600; }
 
-        /* Form Layout */
         .form-group { margin-bottom: 16px; }
         .form-row { display: flex; gap: 15px; margin-bottom: 16px; }
         .form-col { flex: 1; }
@@ -213,6 +212,20 @@
         return result;
     }
 
+    // NEW Strict Date Parser for dd/mm/yyyy
+    function parseDateStrict(dateStr) {
+        if (!dateStr) return null;
+        let datePart = dateStr.split(' ')[0]; 
+        const parts = datePart.split(/[\/\-]/);
+        if (parts.length === 3) {
+            let p0 = parseInt(parts[0], 10), p1 = parseInt(parts[1], 10), p2 = parseInt(parts[2], 10);
+            if (parts[2].length === 4) { return new Date(p2, p1 - 1, p0); } // dd/mm/yyyy
+            if (parts[0].length === 4) { return new Date(p0, p1 - 1, p2); } // yyyy/mm/dd
+        }
+        const fallback = new Date(dateStr);
+        return isNaN(fallback.getTime()) ? null : fallback;
+    }
+
     async function fetchAndPopulateData() {
         try {
             const [resData, resCode] = await Promise.all([fetch(DATA_URL), fetch(CODE_URL)]);
@@ -244,6 +257,18 @@
             for (let i = 1; i < lines.length; i++) {
                 const row = parseCSVLine(lines[i]);
                 if (row.length < 10) continue; 
+                
+                // CACHE PARSED DATE TO ENSURE PERFECT GROUPING
+                const parsedDate = parseDateStrict(row[COL_DATE]);
+                if (parsedDate) {
+                    row.normalizedDateObj = parsedDate;
+                    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    row.displayDate = String(parsedDate.getDate()).padStart(2,'0') + '/' + months[parsedDate.getMonth()] + '/' + parsedDate.getFullYear();
+                } else {
+                    row.normalizedDateObj = new Date(0);
+                    row.displayDate = row[COL_DATE] || '';
+                }
+
                 globalData.push(row);
                 if (row[COL_MAKE]) makes.add(row[COL_MAKE]);
                 if (row[COL_GROUP]) groups.add(row[COL_GROUP]);
@@ -267,20 +292,6 @@
         values.forEach(val => { if(val) select.innerHTML += `<option value="${val}">${val}</option>`; });
     }
 
-    function parseDateCustom(dateStr) {
-        if (!dateStr) return null;
-        const parts = dateStr.split(/[\/\-]/);
-        if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
-        return new Date(dateStr);
-    }
-
-    function formatDisplayDate(dateStr) {
-        const d = parseDateCustom(dateStr);
-        if (!d || isNaN(d)) return dateStr;
-        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        return String(d.getDate()).padStart(2,'0') + '/' + months[d.getMonth()] + '/' + d.getFullYear();
-    }
-
     function toggleCard(codeId) {
         const body = document.getElementById(`body-${codeId}`);
         const arrow = document.getElementById(`arrow-${codeId}`);
@@ -300,6 +311,7 @@
         document.getElementById('loader').style.display = 'block';
 
         setTimeout(() => {
+            // HTML input type="date" always gives YYYY-MM-DD format natively
             const startD = new Date(startDateVal); startD.setHours(0,0,0,0);
             const endD = new Date(endDateVal); endD.setHours(23, 59, 59);
 
@@ -309,9 +321,7 @@
             const sCode = document.getElementById('selCode').value;
 
             const filteredData = globalData.filter(row => {
-                const rowDate = parseDateCustom(row[COL_DATE]);
-                if (!rowDate) return false;
-                let match = (rowDate >= startD && rowDate <= endD);
+                let match = (row.normalizedDateObj >= startD && row.normalizedDateObj <= endD);
                 if (sMake && row[COL_MAKE] !== sMake) match = false;
                 if (sGroup && row[COL_GROUP] !== sGroup) match = false;
                 if (sUser && row[COL_USER] !== sUser) match = false;
@@ -329,8 +339,9 @@
                 groupedFilteredData[code].push(row);
             });
 
+            // Sort completely securely via normalized dates
             Object.keys(groupedFilteredData).forEach(code => {
-                groupedFilteredData[code].sort((a,b) => parseDateCustom(a[COL_DATE]) - parseDateCustom(b[COL_DATE]));
+                groupedFilteredData[code].sort((a,b) => a.normalizedDateObj - b.normalizedDateObj);
             });
 
             document.getElementById('totalRecordsText').innerText = `${filteredData.length} Total Records Found`;
@@ -371,7 +382,7 @@
             const safeId = `code_${index}`;
 
             const groupCounts = {};
-            dataRows.forEach(r => { const grp = r[COL_GROUP] || 'Blank'; groupCounts[grp] = (groupCounts[grp] || 0) + 1; });
+            dataRows.forEach(r => { const grp = (r[COL_GROUP] || 'Blank').toUpperCase(); groupCounts[grp] = (groupCounts[grp] || 0) + 1; });
 
             let summaryHtml = '<div class="summary-grid">';
             Object.keys(groupCounts).sort().forEach(g => {
@@ -439,15 +450,14 @@
         const failSummaryArr = Object.values(failSummaryMap);
         const dateCounts = {};
         dataToPrint.forEach(r => {
-            const d = r[COL_DATE]; dateCounts[d] = (dateCounts[d] || 0) + 1;
+            const d = r.displayDate; dateCounts[d] = (dateCounts[d] || 0) + 1;
         });
 
         const bodyRows = [];
         let currentGroup = -1, previousDate = '';
 
         dataToPrint.forEach((r, idx) => {
-            let rawDate = r[COL_DATE];
-            let displayDate = formatDisplayDate(rawDate);
+            let displayDate = r.displayDate;
             
             let cause = '', fMake = '', fTotal = '';
             if (idx < failSummaryArr.length) {
@@ -462,41 +472,44 @@
                 r[COL_USER] || '', cause, fMake, fTotal
             ];
 
-            if (rawDate !== previousDate) {
-                currentGroup++; previousDate = rawDate;
-                bodyRows.push({ row: [{ content: displayDate, rowSpan: dateCounts[rawDate] }, ...innerRow], grpIdx: currentGroup });
+            // Use valign: top so merged date cell text stays visible at the top
+            if (displayDate !== previousDate) {
+                currentGroup++; previousDate = displayDate;
+                bodyRows.push({ row: [{ content: displayDate, rowSpan: dateCounts[displayDate], styles: { valign: 'top', halign: 'center', fontStyle: 'bold' } }, ...innerRow], grpIdx: currentGroup });
             } else {
                 bodyRows.push({ row: innerRow, grpIdx: currentGroup });
             }
         });
 
-        const startDateStr = formatDisplayDate(document.getElementById('startDate').value);
-        const endDateStr = formatDisplayDate(document.getElementById('endDate').value);
+        // Format dates correctly for the display header
+        const formatForHeader = (dateStr) => {
+            const d = new Date(dateStr);
+            const months = ['01','02','03','04','05','06','07','08','09','10','11','12'];
+            return String(d.getDate()).padStart(2,'0') + '/' + months[d.getMonth()] + '/' + d.getFullYear();
+        }
+        
+        const startDateStr = formatForHeader(document.getElementById('startDate').value);
+        const endDateStr = formatForHeader(document.getElementById('endDate').value);
         const pw = doc.internal.pageSize.width;
 
         // --- DRAW METADATA ON FIRST PAGE OF CODE ONLY ---
-        let currentY = 22; // Start directly below the 20px top banner
+        let currentY = 22; 
         doc.setTextColor(0);
-        
         doc.setFontSize(9); doc.setFont('helvetica', 'bold');
         
-        // Col 1 (Dates)
         doc.text("Start Date:", 14, currentY + 5); doc.setFont('helvetica', 'normal'); doc.text(startDateStr, 35, currentY + 5);
         doc.setFont('helvetica', 'bold'); doc.text("End Date:", 14, currentY + 11); doc.setFont('helvetica', 'normal'); doc.text(endDateStr, 35, currentY + 11);
         
-        // Col 2 (Details)
         doc.setFont('helvetica', 'bold'); doc.text("Code:", pw/2 - 40, currentY + 5); doc.setFont('helvetica', 'normal'); doc.text(code, pw/2 - 10, currentY + 5);
         doc.setFont('helvetica', 'bold'); doc.text("Type of Bogies:", pw/2 - 40, currentY + 11); doc.setFont('helvetica', 'normal'); doc.text(details.bogie, pw/2 - 10, currentY + 11);
         doc.setFont('helvetica', 'bold'); doc.text("Type of Spring:", pw/2 - 40, currentY + 17); doc.setFont('helvetica', 'normal'); doc.text(details.spring, pw/2 - 10, currentY + 17);
         doc.setFont('helvetica', 'bold'); doc.text("Load:", pw/2 - 40, currentY + 23); doc.setFont('helvetica', 'normal'); doc.text(details.load, pw/2 - 10, currentY + 23);
 
-        // Col 3 (Stats)
         doc.setFont('helvetica', 'bold');
         doc.text("Total:", pw - 30, currentY + 5); doc.setFont('helvetica', 'normal'); doc.text(total.toString(), pw - 15, currentY + 5);
         doc.setFont('helvetica', 'bold'); doc.text("Pass:", pw - 30, currentY + 11); doc.setFont('helvetica', 'normal'); doc.text(pass.toString(), pw - 15, currentY + 11);
         doc.setFont('helvetica', 'bold'); doc.text("Fail:", pw - 30, currentY + 17); doc.setFont('helvetica', 'normal'); doc.text(fail.toString(), pw - 15, currentY + 17);
 
-        // A, B, C Group Badges
         let badgeY = currentY + 20;
         doc.setFillColor(253, 224, 71); doc.rect(14, badgeY, 20, 6, 'F');
         doc.setTextColor(0); doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.text(`A - ${countA}`, 24, badgeY + 4, {align: 'center'});
@@ -509,8 +522,8 @@
 
         // --- RENDER TABLE ---
         doc.autoTable({
-            startY: 52, 
-            margin: { top: 22 }, // Subseq. pages start below the 20px top banner
+            startY: 52, // First page starts directly below metadata
+            margin: { top: 22 }, // Subseq. pages start right below the 20px top banner
             head: [
                 [ 
                     { content: '', colSpan: 10, styles: { fillColor: [147, 197, 253] } },
@@ -533,6 +546,7 @@
                     if (data.column.index < 10) {
                         data.cell.styles.fillColor = rowData.grpIdx % 2 === 0 ? [255, 255, 255] : [241, 245, 249]; 
                     } else {
+                        // Independent alternate color logic for failure columns
                         data.cell.styles.fillColor = data.row.index % 2 === 0 ? [255, 255, 255] : [254, 226, 226]; 
                         if(data.column.index === 12) data.cell.styles.halign = 'center'; 
                     }
@@ -566,7 +580,7 @@
         if (isAll) {
             const codes = Object.keys(groupedFilteredData);
             for(let i = 0; i < codes.length; i++) {
-                if (i > 0) doc.addPage(); // Start a fresh page for the next code
+                if (i > 0) doc.addPage();
                 buildCodePdfBlock(doc, codes[i], groupedFilteredData[codes[i]]);
             }
         } else {
@@ -581,7 +595,13 @@
             const blob = await buildPDFBlob(code, isAll);
             const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
             const prefix = isAll ? 'ALL_CODES' : `Code_${code}`;
-            a.download = `Report_${prefix}_${document.getElementById('startDate').value}_to_${document.getElementById('endDate').value}.pdf`;
+            
+            // Generate standard YYYY-MM-DD for filename
+            const startD = new Date(document.getElementById('startDate').value);
+            const endD = new Date(document.getElementById('endDate').value);
+            const fName = `Report_${prefix}_${startD.getFullYear()}-${String(startD.getMonth()+1).padStart(2,'0')}-${String(startD.getDate()).padStart(2,'0')}_to_${endD.getFullYear()}-${String(endD.getMonth()+1).padStart(2,'0')}-${String(endD.getDate()).padStart(2,'0')}.pdf`;
+            
+            a.download = fName;
             document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
         } catch (e) { console.error(e); showToast("Error generating PDF"); }
     }
