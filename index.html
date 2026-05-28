@@ -171,8 +171,9 @@
     const DATA_URL = 'https://docs.google.com/spreadsheets/d/1WYK6dThqgY6vU-HpKggFXN0Roz3aq3wX99BTGDEkgcQ/export?format=csv&gid=0';
     const CODE_URL = 'https://docs.google.com/spreadsheets/d/1WYK6dThqgY6vU-HpKggFXN0Roz3aq3wX99BTGDEkgcQ/export?format=csv&gid=2132794261';
     
+    // Exact column mappings as requested
     const COL_DATE = 1, COL_MAKE = 2, COL_MFG = 3, COL_SL = 4, COL_FREE_HT = 5, COL_HT_LOAD = 7;
-    const COL_GROUP = 8, COL_CRACK = 9, COL_REMARK = 11, COL_CODE = 12, COL_USER = 18; 
+    const COL_GROUP = 8, COL_CRACK = 9, COL_CAUSE = 10, COL_REMARK = 11, COL_CODE = 12, COL_USER = 18; 
     
     let globalData = [];
     let codeDetailsMap = {};
@@ -212,7 +213,7 @@
         return result;
     }
 
-    // NEW Strict Date Parser for dd/mm/yyyy
+    // Strict Date Parser for dd/mm/yyyy
     function parseDateStrict(dateStr) {
         if (!dateStr) return null;
         let datePart = dateStr.split(' ')[0]; 
@@ -232,7 +233,6 @@
             const csvData = await resData.text();
             const csvCode = await resCode.text();
             
-            // Process Code Info Sheet
             const codeLines = csvCode.split('\n').filter(l => l.trim() !== '');
             const codeHeaders = parseCSVLine(codeLines[0]).map(h => h.toLowerCase());
             
@@ -250,7 +250,6 @@
                 }
             }
 
-            // Process Main Data Sheet
             const lines = csvData.split('\n').filter(l => l.trim() !== '');
             const makes = new Set(), groups = new Set(), users = new Set(), codes = new Set();
             
@@ -258,11 +257,10 @@
                 const row = parseCSVLine(lines[i]);
                 if (row.length < 10) continue; 
                 
-                // CACHE PARSED DATE TO ENSURE PERFECT GROUPING
                 const parsedDate = parseDateStrict(row[COL_DATE]);
                 if (parsedDate) {
                     row.normalizedDateObj = parsedDate;
-                    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    const months = ['01','02','03','04','05','06','07','08','09','10','11','12'];
                     row.displayDate = String(parsedDate.getDate()).padStart(2,'0') + '/' + months[parsedDate.getMonth()] + '/' + parsedDate.getFullYear();
                 } else {
                     row.normalizedDateObj = new Date(0);
@@ -311,7 +309,6 @@
         document.getElementById('loader').style.display = 'block';
 
         setTimeout(() => {
-            // HTML input type="date" always gives YYYY-MM-DD format natively
             const startD = new Date(startDateVal); startD.setHours(0,0,0,0);
             const endD = new Date(endDateVal); endD.setHours(23, 59, 59);
 
@@ -339,7 +336,7 @@
                 groupedFilteredData[code].push(row);
             });
 
-            // Sort completely securely via normalized dates
+            // Sort safely via normalized dates to prevent grouping gaps
             Object.keys(groupedFilteredData).forEach(code => {
                 groupedFilteredData[code].sort((a,b) => a.normalizedDateObj - b.normalizedDateObj);
             });
@@ -356,7 +353,6 @@
         const container = document.getElementById('codeCardsContainer');
         container.innerHTML = '';
 
-        // Add "ALL SECTIONS" Super Card
         const allCard = document.createElement('div');
         allCard.className = 'code-card all-card';
         allCard.innerHTML = `
@@ -448,40 +444,55 @@
         });
 
         const failSummaryArr = Object.values(failSummaryMap);
-        const dateCounts = {};
-        dataToPrint.forEach(r => {
-            const d = r.displayDate; dateCounts[d] = (dateCounts[d] || 0) + 1;
-        });
-
+        
         const bodyRows = [];
-        let currentGroup = -1, previousDate = '';
+        let currentGroup = -1;
+        let i = 0;
+        let failIdx = 0; // Safely track side table rows
 
-        dataToPrint.forEach((r, idx) => {
-            let displayDate = r.displayDate;
+        // Strict contiguous block grouping to prevent rowSpan gaps
+        while (i < dataToPrint.length) {
+            let startRow = dataToPrint[i];
+            let displayDate = startRow.displayDate;
             
-            let cause = '', fMake = '', fTotal = '';
-            if (idx < failSummaryArr.length) {
-                cause = failSummaryArr[idx].cause;
-                fMake = failSummaryArr[idx].make;
-                fTotal = failSummaryArr[idx].count.toString();
+            let span = 1;
+            while (i + span < dataToPrint.length && dataToPrint[i + span].displayDate === displayDate) {
+                span++;
             }
+            
+            currentGroup++;
+            
+            for (let j = 0; j < span; j++) {
+                let r = dataToPrint[i + j];
+                
+                let cause = '', fMake = '', fTotal = '';
+                if (failIdx < failSummaryArr.length) {
+                    cause = failSummaryArr[failIdx].cause;
+                    fMake = failSummaryArr[failIdx].make;
+                    fTotal = failSummaryArr[failIdx].count.toString();
+                    failIdx++;
+                }
 
-            let innerRow = [
-                r[COL_MAKE] || '', r[COL_MFG] || '', r[COL_SL] || '', r[COL_FREE_HT] || '', 
-                r[COL_HT_LOAD] || '', r[COL_GROUP] || '', r[COL_CRACK] || '', r[COL_REMARK] || '', 
-                r[COL_USER] || '', cause, fMake, fTotal
-            ];
+                // Replacing 'Remark' in PDF with 'COL_CAUSE' (10) from sheet
+                let innerRow = [
+                    r[COL_MAKE] || '', r[COL_MFG] || '', r[COL_SL] || '', r[COL_FREE_HT] || '', 
+                    r[COL_HT_LOAD] || '', r[COL_GROUP] || '', r[COL_CRACK] || '', r[COL_CAUSE] || '', 
+                    r[COL_USER] || '', cause, fMake, fTotal
+                ];
 
-            // Use valign: top so merged date cell text stays visible at the top
-            if (displayDate !== previousDate) {
-                currentGroup++; previousDate = displayDate;
-                bodyRows.push({ row: [{ content: displayDate, rowSpan: dateCounts[displayDate], styles: { valign: 'top', halign: 'center', fontStyle: 'bold' } }, ...innerRow], grpIdx: currentGroup });
-            } else {
-                bodyRows.push({ row: innerRow, grpIdx: currentGroup });
+                if (j === 0) {
+                    // Start of group: Pass Date and rowSpan (valign 'top' fixes disappearing text)
+                    bodyRows.push({ 
+                        row: [{ content: displayDate, rowSpan: span, styles: { valign: 'top', halign: 'center', fontStyle: 'bold' } }, ...innerRow], 
+                        grpIdx: currentGroup 
+                    });
+                } else {
+                    bodyRows.push({ row: innerRow, grpIdx: currentGroup });
+                }
             }
-        });
+            i += span;
+        }
 
-        // Format dates correctly for the display header
         const formatForHeader = (dateStr) => {
             const d = new Date(dateStr);
             const months = ['01','02','03','04','05','06','07','08','09','10','11','12'];
@@ -492,25 +503,31 @@
         const endDateStr = formatForHeader(document.getElementById('endDate').value);
         const pw = doc.internal.pageSize.width;
 
-        // --- DRAW METADATA ON FIRST PAGE OF CODE ONLY ---
-        let currentY = 22; 
-        doc.setTextColor(0);
+        // ==========================================
+        // RENDER STATIC METADATA (FIRST PAGE ONLY)
+        // ==========================================
+        let currentY = 15; 
+        
+        doc.setFillColor(147, 197, 253);
+        doc.rect(0, 0, pw, 10, 'F');
+        doc.setTextColor(0); doc.setFontSize(18); doc.setFont('helvetica', 'bold');
+        doc.text("Spring Report", pw / 2, 20, { align: 'center' });
+
         doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+        doc.text("Start Date:", 14, currentY + 12); doc.setFont('helvetica', 'normal'); doc.text(startDateStr, 35, currentY + 12);
+        doc.setFont('helvetica', 'bold'); doc.text("End Date:", 14, currentY + 18); doc.setFont('helvetica', 'normal'); doc.text(endDateStr, 35, currentY + 18);
         
-        doc.text("Start Date:", 14, currentY + 5); doc.setFont('helvetica', 'normal'); doc.text(startDateStr, 35, currentY + 5);
-        doc.setFont('helvetica', 'bold'); doc.text("End Date:", 14, currentY + 11); doc.setFont('helvetica', 'normal'); doc.text(endDateStr, 35, currentY + 11);
-        
-        doc.setFont('helvetica', 'bold'); doc.text("Code:", pw/2 - 40, currentY + 5); doc.setFont('helvetica', 'normal'); doc.text(code, pw/2 - 10, currentY + 5);
-        doc.setFont('helvetica', 'bold'); doc.text("Type of Bogies:", pw/2 - 40, currentY + 11); doc.setFont('helvetica', 'normal'); doc.text(details.bogie, pw/2 - 10, currentY + 11);
-        doc.setFont('helvetica', 'bold'); doc.text("Type of Spring:", pw/2 - 40, currentY + 17); doc.setFont('helvetica', 'normal'); doc.text(details.spring, pw/2 - 10, currentY + 17);
-        doc.setFont('helvetica', 'bold'); doc.text("Load:", pw/2 - 40, currentY + 23); doc.setFont('helvetica', 'normal'); doc.text(details.load, pw/2 - 10, currentY + 23);
+        doc.setFont('helvetica', 'bold'); doc.text("Code:", pw/2 - 40, currentY + 12); doc.setFont('helvetica', 'normal'); doc.text(code, pw/2 - 10, currentY + 12);
+        doc.setFont('helvetica', 'bold'); doc.text("Type of Bogies:", pw/2 - 40, currentY + 18); doc.setFont('helvetica', 'normal'); doc.text(details.bogie, pw/2 - 10, currentY + 18);
+        doc.setFont('helvetica', 'bold'); doc.text("Type of Spring:", pw/2 - 40, currentY + 24); doc.setFont('helvetica', 'normal'); doc.text(details.spring, pw/2 - 10, currentY + 24);
+        doc.setFont('helvetica', 'bold'); doc.text("Load:", pw/2 - 40, currentY + 30); doc.setFont('helvetica', 'normal'); doc.text(details.load, pw/2 - 10, currentY + 30);
 
         doc.setFont('helvetica', 'bold');
-        doc.text("Total:", pw - 30, currentY + 5); doc.setFont('helvetica', 'normal'); doc.text(total.toString(), pw - 15, currentY + 5);
-        doc.setFont('helvetica', 'bold'); doc.text("Pass:", pw - 30, currentY + 11); doc.setFont('helvetica', 'normal'); doc.text(pass.toString(), pw - 15, currentY + 11);
-        doc.setFont('helvetica', 'bold'); doc.text("Fail:", pw - 30, currentY + 17); doc.setFont('helvetica', 'normal'); doc.text(fail.toString(), pw - 15, currentY + 17);
+        doc.text("Total:", pw - 35, currentY + 12); doc.setFont('helvetica', 'normal'); doc.text(total.toString(), pw - 20, currentY + 12);
+        doc.setFont('helvetica', 'bold'); doc.text("Pass:", pw - 35, currentY + 18); doc.setFont('helvetica', 'normal'); doc.text(pass.toString(), pw - 20, currentY + 18);
+        doc.setFont('helvetica', 'bold'); doc.text("Fail:", pw - 35, currentY + 24); doc.setFont('helvetica', 'normal'); doc.text(fail.toString(), pw - 20, currentY + 24);
 
-        let badgeY = currentY + 20;
+        let badgeY = currentY + 27;
         doc.setFillColor(253, 224, 71); doc.rect(14, badgeY, 20, 6, 'F');
         doc.setTextColor(0); doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.text(`A - ${countA}`, 24, badgeY + 4, {align: 'center'});
         
@@ -520,55 +537,46 @@
         doc.setFillColor(74, 222, 128); doc.rect(58, badgeY, 20, 6, 'F');
         doc.text(`C - ${countC}`, 68, badgeY + 4, {align: 'center'});
 
-        // --- RENDER TABLE ---
+        // ==========================================
+        // RENDER DATA TABLE
+        // ==========================================
         doc.autoTable({
-            startY: 52, // First page starts directly below metadata
-            margin: { top: 22 }, // Subseq. pages start right below the 20px top banner
+            startY: 55, // Leaves space for static header on first page
+            margin: { top: 15 }, // Subsequent pages start tightly at the top
             head: [
                 [ 
-                    { content: '', colSpan: 10, styles: { fillColor: [147, 197, 253] } },
+                    { content: 'Main Data Record', colSpan: 10, styles: { fillColor: [30, 58, 138], textColor: 255 } },
                     { content: 'Failure Report', colSpan: 3, styles: { fillColor: [225, 29, 72], textColor: 255, halign: 'center' } }
                 ],
                 [ 'Date', 'Make', 'Mfg. Date', 'SL. No.', 'Free Height', 'Height Under Load', 'Group', 'Crack', 'Remark', 'Tested By', 'Cause of Failure', 'Make', 'Total' ]
             ],
             body: bodyRows.map(r => r.row),
             theme: 'grid',
-            styles: { fontSize: 7, cellPadding: 2, lineColor: [255, 255, 255], lineWidth: 0.5, valign: 'middle', textColor: 0 },
+            styles: { fontSize: 7, cellPadding: 2, lineColor: [200, 200, 200], lineWidth: 0.1, valign: 'middle', textColor: 0 },
             didParseCell: function(data) {
                 if (data.section === 'head' && data.row.index === 1) {
-                    if (data.column.index === 9) { data.cell.styles.fillColor = [253, 224, 71]; } 
-                    else if (data.column.index >= 10) { data.cell.styles.fillColor = [225, 29, 72]; data.cell.styles.textColor = [255, 255, 255]; } 
-                    else { data.cell.styles.fillColor = [147, 197, 253]; }
+                    if (data.column.index < 10) { data.cell.styles.fillColor = [235, 243, 255]; data.cell.styles.textColor = 0; } 
+                    else { data.cell.styles.fillColor = [254, 226, 226]; data.cell.styles.textColor = 0; }
                     data.cell.styles.halign = 'center'; data.cell.styles.fontStyle = 'bold';
                 }
                 if (data.section === 'body') {
                     const rowData = bodyRows[data.row.index];
                     if (data.column.index < 10) {
-                        data.cell.styles.fillColor = rowData.grpIdx % 2 === 0 ? [255, 255, 255] : [241, 245, 249]; 
+                        // Alternate based on Date Block
+                        data.cell.styles.fillColor = rowData.grpIdx % 2 === 0 ? [255, 255, 255] : [240, 248, 255]; 
                     } else {
-                        // Independent alternate color logic for failure columns
-                        data.cell.styles.fillColor = data.row.index % 2 === 0 ? [255, 255, 255] : [254, 226, 226]; 
+                        // Independent Alternate based on Row Index
+                        data.cell.styles.fillColor = data.row.index % 2 === 0 ? [255, 255, 255] : [255, 240, 240]; 
                         if(data.column.index === 12) data.cell.styles.halign = 'center'; 
                     }
                     if(data.column.index === 0) { data.cell.styles.halign = 'center'; data.cell.styles.fontStyle = 'bold'; }
                 }
             },
             didDrawPage: function (data) {
-                // Top Banner (Draws on EVERY page)
-                doc.setFillColor(147, 197, 253);
-                doc.rect(0, 0, pw, 20, 'F');
-
-                doc.setFillColor(56, 189, 248);
-                doc.rect(10, 2, 16, 16, 'F'); 
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(10); doc.setFont('helvetica', 'bold');
-                doc.text("App", 12.5, 12.5);
-                
-                doc.setTextColor(0); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
-                doc.text("Created By", 30, 8); doc.text("Gobind Sharma", 30, 12);
-
-                doc.setFontSize(18); doc.setFont('helvetica', 'bold');
-                doc.text("Spring Report", pw / 2, 13, { align: 'center' });
+                // Ensure only the small footer repeats, header is ONLY on first page.
+                doc.setTextColor(150); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+                doc.text("App Created By Gobind Sharma", 14, doc.internal.pageSize.height - 5);
+                doc.text(`Page ${doc.internal.getNumberOfPages()}`, pw - 20, doc.internal.pageSize.height - 5);
             }
         });
     }
@@ -596,7 +604,6 @@
             const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
             const prefix = isAll ? 'ALL_CODES' : `Code_${code}`;
             
-            // Generate standard YYYY-MM-DD for filename
             const startD = new Date(document.getElementById('startDate').value);
             const endD = new Date(document.getElementById('endDate').value);
             const fName = `Report_${prefix}_${startD.getFullYear()}-${String(startD.getMonth()+1).padStart(2,'0')}-${String(startD.getDate()).padStart(2,'0')}_to_${endD.getFullYear()}-${String(endD.getMonth()+1).padStart(2,'0')}-${String(endD.getDate()).padStart(2,'0')}.pdf`;
