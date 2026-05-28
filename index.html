@@ -171,9 +171,9 @@
     const DATA_URL = 'https://docs.google.com/spreadsheets/d/1WYK6dThqgY6vU-HpKggFXN0Roz3aq3wX99BTGDEkgcQ/export?format=csv&gid=0';
     const CODE_URL = 'https://docs.google.com/spreadsheets/d/1WYK6dThqgY6vU-HpKggFXN0Roz3aq3wX99BTGDEkgcQ/export?format=csv&gid=2132794261';
     
-    // Exact column mappings as requested
+    // Column Mappings
     const COL_DATE = 1, COL_MAKE = 2, COL_MFG = 3, COL_SL = 4, COL_FREE_HT = 5, COL_HT_LOAD = 7;
-    const COL_GROUP = 8, COL_CRACK = 9, COL_CAUSE = 10, COL_REMARK = 11, COL_CODE = 12, COL_USER = 18; 
+    const COL_GROUP = 8, COL_CRACK = 9, COL_CAUSE = 10, COL_CODE = 12, COL_USER = 18; 
     
     let globalData = [];
     let codeDetailsMap = {};
@@ -213,15 +213,14 @@
         return result;
     }
 
-    // Strict Date Parser for dd/mm/yyyy
     function parseDateStrict(dateStr) {
         if (!dateStr) return null;
         let datePart = dateStr.split(' ')[0]; 
         const parts = datePart.split(/[\/\-]/);
         if (parts.length === 3) {
             let p0 = parseInt(parts[0], 10), p1 = parseInt(parts[1], 10), p2 = parseInt(parts[2], 10);
-            if (parts[2].length === 4) { return new Date(p2, p1 - 1, p0); } // dd/mm/yyyy
-            if (parts[0].length === 4) { return new Date(p0, p1 - 1, p2); } // yyyy/mm/dd
+            if (parts[2].length === 4) { return new Date(p2, p1 - 1, p0); } 
+            if (parts[0].length === 4) { return new Date(p0, p1 - 1, p2); } 
         }
         const fallback = new Date(dateStr);
         return isNaN(fallback.getTime()) ? null : fallback;
@@ -336,7 +335,6 @@
                 groupedFilteredData[code].push(row);
             });
 
-            // Sort safely via normalized dates to prevent grouping gaps
             Object.keys(groupedFilteredData).forEach(code => {
                 groupedFilteredData[code].sort((a,b) => a.normalizedDateObj - b.normalizedDateObj);
             });
@@ -427,11 +425,12 @@
         let countA = 0, countB = 0, countC = 0;
         let failSummaryMap = {};
 
+        // Calculate Metadata & Failure Summary
         dataToPrint.forEach(r => {
             const grp = (r[COL_GROUP] || '').toUpperCase();
             if (grp === 'FAIL') {
                 fail++;
-                let cause = r[COL_REMARK] || 'Unknown';
+                let cause = r[COL_CAUSE] || 'Unknown';
                 let make = r[COL_MAKE] || '-';
                 let key = cause + '|' + make;
                 if(!failSummaryMap[key]) failSummaryMap[key] = { cause, make, count: 0 };
@@ -446,11 +445,10 @@
         const failSummaryArr = Object.values(failSummaryMap);
         
         const bodyRows = [];
-        let currentGroup = -1;
         let i = 0;
-        let failIdx = 0; // Safely track side table rows
+        let failIdx = 0;
 
-        // Strict contiguous block grouping to prevent rowSpan gaps
+        // Strict contiguous block grouping logic
         while (i < dataToPrint.length) {
             let startRow = dataToPrint[i];
             let displayDate = startRow.displayDate;
@@ -459,8 +457,6 @@
             while (i + span < dataToPrint.length && dataToPrint[i + span].displayDate === displayDate) {
                 span++;
             }
-            
-            currentGroup++;
             
             for (let j = 0; j < span; j++) {
                 let r = dataToPrint[i + j];
@@ -473,7 +469,7 @@
                     failIdx++;
                 }
 
-                // Replacing 'Remark' in PDF with 'COL_CAUSE' (10) from sheet
+                // Note: r[COL_CAUSE] represents the 'Remark' column based on your instructions
                 let innerRow = [
                     r[COL_MAKE] || '', r[COL_MFG] || '', r[COL_SL] || '', r[COL_FREE_HT] || '', 
                     r[COL_HT_LOAD] || '', r[COL_GROUP] || '', r[COL_CRACK] || '', r[COL_CAUSE] || '', 
@@ -481,13 +477,13 @@
                 ];
 
                 if (j === 0) {
-                    // Start of group: Pass Date and rowSpan (valign 'top' fixes disappearing text)
-                    bodyRows.push({ 
-                        row: [{ content: displayDate, rowSpan: span, styles: { valign: 'top', halign: 'center', fontStyle: 'bold' } }, ...innerRow], 
-                        grpIdx: currentGroup 
-                    });
+                    // First row of date group gets the merged cell
+                    bodyRows.push([
+                        { content: displayDate, rowSpan: span, styles: { valign: 'top', halign: 'center' } }, 
+                        ...innerRow
+                    ]);
                 } else {
-                    bodyRows.push({ row: innerRow, grpIdx: currentGroup });
+                    bodyRows.push(innerRow);
                 }
             }
             i += span;
@@ -506,74 +502,95 @@
         // ==========================================
         // RENDER STATIC METADATA (FIRST PAGE ONLY)
         // ==========================================
-        let currentY = 15; 
+        let currentY = 18; 
         
-        doc.setFillColor(147, 197, 253);
-        doc.rect(0, 0, pw, 10, 'F');
-        doc.setTextColor(0); doc.setFontSize(18); doc.setFont('helvetica', 'bold');
-        doc.text("Spring Report", pw / 2, 20, { align: 'center' });
+        // Background for Header Block
+        doc.setFillColor(167, 203, 237); // Light Blue Background
+        doc.rect(0, 0, pw, 45, 'F');
+        
+        // Title
+        doc.setTextColor(0); doc.setFontSize(20); doc.setFont('helvetica', 'bold');
+        doc.text("Spring Report", pw / 2, 14, { align: 'center' });
 
+        doc.setFontSize(8); doc.setFont('helvetica', 'bold');
+        doc.text("App", 14, 10); doc.setFont('helvetica', 'normal');
+        doc.text("Created By\nGobind Sharma", 14, 14);
+
+        // Meta Column 1
         doc.setFontSize(9); doc.setFont('helvetica', 'bold');
-        doc.text("Start Date:", 14, currentY + 12); doc.setFont('helvetica', 'normal'); doc.text(startDateStr, 35, currentY + 12);
-        doc.setFont('helvetica', 'bold'); doc.text("End Date:", 14, currentY + 18); doc.setFont('helvetica', 'normal'); doc.text(endDateStr, 35, currentY + 18);
+        doc.text("Start Date:", 14, currentY + 7); doc.setFont('helvetica', 'normal'); doc.text(startDateStr, 35, currentY + 7);
+        doc.setFont('helvetica', 'bold'); doc.text("End Date:", 14, currentY + 12); doc.setFont('helvetica', 'normal'); doc.text(endDateStr, 35, currentY + 12);
         
-        doc.setFont('helvetica', 'bold'); doc.text("Code:", pw/2 - 40, currentY + 12); doc.setFont('helvetica', 'normal'); doc.text(code, pw/2 - 10, currentY + 12);
-        doc.setFont('helvetica', 'bold'); doc.text("Type of Bogies:", pw/2 - 40, currentY + 18); doc.setFont('helvetica', 'normal'); doc.text(details.bogie, pw/2 - 10, currentY + 18);
-        doc.setFont('helvetica', 'bold'); doc.text("Type of Spring:", pw/2 - 40, currentY + 24); doc.setFont('helvetica', 'normal'); doc.text(details.spring, pw/2 - 10, currentY + 24);
-        doc.setFont('helvetica', 'bold'); doc.text("Load:", pw/2 - 40, currentY + 30); doc.setFont('helvetica', 'normal'); doc.text(details.load, pw/2 - 10, currentY + 30);
+        // Meta Column 2
+        doc.setFont('helvetica', 'bold'); doc.text("Code:", pw/2 - 40, currentY + 7); doc.setFont('helvetica', 'normal'); doc.text(code, pw/2 - 10, currentY + 7);
+        doc.setFont('helvetica', 'bold'); doc.text("Type of Bogies:", pw/2 - 40, currentY + 12); doc.setFont('helvetica', 'normal'); doc.text(details.bogie, pw/2 - 10, currentY + 12);
+        doc.setFont('helvetica', 'bold'); doc.text("Type of Spring:", pw/2 - 40, currentY + 17); doc.setFont('helvetica', 'normal'); doc.text(details.spring, pw/2 - 10, currentY + 17);
+        doc.setFont('helvetica', 'bold'); doc.text("Load:", pw/2 - 40, currentY + 22); doc.setFont('helvetica', 'normal'); doc.text(details.load, pw/2 - 10, currentY + 22);
 
+        // Meta Column 3
         doc.setFont('helvetica', 'bold');
-        doc.text("Total:", pw - 35, currentY + 12); doc.setFont('helvetica', 'normal'); doc.text(total.toString(), pw - 20, currentY + 12);
-        doc.setFont('helvetica', 'bold'); doc.text("Pass:", pw - 35, currentY + 18); doc.setFont('helvetica', 'normal'); doc.text(pass.toString(), pw - 20, currentY + 18);
-        doc.setFont('helvetica', 'bold'); doc.text("Fail:", pw - 35, currentY + 24); doc.setFont('helvetica', 'normal'); doc.text(fail.toString(), pw - 20, currentY + 24);
+        doc.text("Total:", pw - 35, currentY + 7); doc.setFont('helvetica', 'normal'); doc.text(total.toString(), pw - 20, currentY + 7);
+        doc.setFont('helvetica', 'bold'); doc.text("Pass:", pw - 35, currentY + 12); doc.setFont('helvetica', 'normal'); doc.text(pass.toString(), pw - 20, currentY + 12);
+        doc.setFont('helvetica', 'bold'); doc.text("Fail:", pw - 35, currentY + 17); doc.setFont('helvetica', 'normal'); doc.text(fail.toString(), pw - 20, currentY + 17);
 
-        let badgeY = currentY + 27;
-        doc.setFillColor(253, 224, 71); doc.rect(14, badgeY, 20, 6, 'F');
-        doc.setTextColor(0); doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.text(`A - ${countA}`, 24, badgeY + 4, {align: 'center'});
+        // A, B, C Group Badges
+        let badgeY = currentY + 18;
+        doc.setFillColor(253, 224, 71); doc.rect(14, badgeY, 18, 5, 'F');
+        doc.setTextColor(0); doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.text(`A - ${countA}`, 23, badgeY + 3.5, {align: 'center'});
         
-        doc.setFillColor(96, 165, 250); doc.rect(36, badgeY, 20, 6, 'F');
-        doc.text(`B - ${countB}`, 46, badgeY + 4, {align: 'center'});
+        doc.setFillColor(96, 165, 250); doc.rect(34, badgeY, 18, 5, 'F');
+        doc.text(`B - ${countB}`, 43, badgeY + 3.5, {align: 'center'});
         
-        doc.setFillColor(74, 222, 128); doc.rect(58, badgeY, 20, 6, 'F');
-        doc.text(`C - ${countC}`, 68, badgeY + 4, {align: 'center'});
+        doc.setFillColor(74, 222, 128); doc.rect(54, badgeY, 18, 5, 'F');
+        doc.text(`C - ${countC}`, 63, badgeY + 3.5, {align: 'center'});
+        
+        // Add Failure Report Top Text Over Red Area
+        doc.setFontSize(9); doc.text("Failure Report", pw - 14, 43, {align: 'right'});
 
         // ==========================================
         // RENDER DATA TABLE
         // ==========================================
         doc.autoTable({
-            startY: 55, // Leaves space for static header on first page
+            startY: 45, // Leaves space for static header on first page
             margin: { top: 15 }, // Subsequent pages start tightly at the top
             head: [
-                [ 
-                    { content: 'Main Data Record', colSpan: 10, styles: { fillColor: [30, 58, 138], textColor: 255 } },
-                    { content: 'Failure Report', colSpan: 3, styles: { fillColor: [225, 29, 72], textColor: 255, halign: 'center' } }
-                ],
                 [ 'Date', 'Make', 'Mfg. Date', 'SL. No.', 'Free Height', 'Height Under Load', 'Group', 'Crack', 'Remark', 'Tested By', 'Cause of Failure', 'Make', 'Total' ]
             ],
-            body: bodyRows.map(r => r.row),
+            body: bodyRows,
             theme: 'grid',
-            styles: { fontSize: 7, cellPadding: 2, lineColor: [200, 200, 200], lineWidth: 0.1, valign: 'middle', textColor: 0 },
+            styles: { fontSize: 7, cellPadding: 2, lineColor: [180, 180, 180], lineWidth: 0.1, valign: 'middle', textColor: 0 },
             didParseCell: function(data) {
-                if (data.section === 'head' && data.row.index === 1) {
-                    if (data.column.index < 10) { data.cell.styles.fillColor = [235, 243, 255]; data.cell.styles.textColor = 0; } 
-                    else { data.cell.styles.fillColor = [254, 226, 226]; data.cell.styles.textColor = 0; }
-                    data.cell.styles.halign = 'center'; data.cell.styles.fontStyle = 'bold';
+                if (data.section === 'head') {
+                    if (data.column.index < 9) { 
+                        data.cell.styles.fillColor = [167, 203, 237]; 
+                        data.cell.styles.textColor = 0; 
+                    } else if (data.column.index === 9) {
+                        data.cell.styles.fillColor = [253, 224, 71]; // Yellow for Tested By
+                        data.cell.styles.textColor = 0;
+                    } else { 
+                        data.cell.styles.fillColor = [239, 68, 68]; // Red for Failure Report headers
+                        data.cell.styles.textColor = 255; 
+                    }
+                    data.cell.styles.halign = 'center'; 
                 }
                 if (data.section === 'body') {
-                    const rowData = bodyRows[data.row.index];
-                    if (data.column.index < 10) {
-                        // Alternate based on Date Block
-                        data.cell.styles.fillColor = rowData.grpIdx % 2 === 0 ? [255, 255, 255] : [240, 248, 255]; 
-                    } else {
-                        // Independent Alternate based on Row Index
-                        data.cell.styles.fillColor = data.row.index % 2 === 0 ? [255, 255, 255] : [255, 240, 240]; 
-                        if(data.column.index === 12) data.cell.styles.halign = 'center'; 
+                    // Set clean white background for all standard rows per the screenshot
+                    data.cell.styles.fillColor = [255, 255, 255]; 
+                    if(data.column.index >= 10 && data.column.index <= 12) {
+                        data.cell.styles.halign = 'center'; 
                     }
-                    if(data.column.index === 0) { data.cell.styles.halign = 'center'; data.cell.styles.fontStyle = 'bold'; }
                 }
             },
             didDrawPage: function (data) {
-                // Ensure only the small footer repeats, header is ONLY on first page.
+                // Draw thin top bar for continuation pages (page > 1 for this autoTable instance)
+                if (data.pageCount > 1) {
+                    doc.setFillColor(167, 203, 237);
+                    doc.rect(0, 0, pw, 15, 'F');
+                    doc.setTextColor(0); doc.setFontSize(12); doc.setFont('helvetica', 'bold');
+                    doc.text(`Spring Report - Code: ${code} (Continued)`, pw / 2, 10, { align: 'center' });
+                }
+                
+                // Footer repeats on all pages
                 doc.setTextColor(150); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
                 doc.text("App Created By Gobind Sharma", 14, doc.internal.pageSize.height - 5);
                 doc.text(`Page ${doc.internal.getNumberOfPages()}`, pw - 20, doc.internal.pageSize.height - 5);
